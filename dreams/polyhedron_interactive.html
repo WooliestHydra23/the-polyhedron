@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Polyhedron — Dream Geometries</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0a0f;
+      color: #e8e8f0;
+      font-family: 'Georgia', serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    h1 {
+      text-align: center;
+      font-weight: 300;
+      font-size: 2.5rem;
+      letter-spacing: 0.1em;
+      text-transform: lowercase;
+      color: #7a6ad8;
+      margin-bottom: 1rem;
+    }
+    .subtitle {
+      text-align: center;
+      color: #666;
+      font-style: italic;
+      margin-bottom: 3rem;
+    }
+    .polyhedron {
+      position: relative;
+      width: 100%;
+      height: 60vh;
+      min-height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 1000px;
+    }
+    .facet {
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      border: 1px solid rgba(122, 106, 216, 0.3);
+      background: linear-gradient(135deg, rgba(122, 106, 216, 0.05), rgba(30, 30, 50, 0.8));
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+      opacity: 0;
+      transform-style: preserve-3d;
+    }
+    .facet:hover {
+      transform: scale(1.15) translateZ(50px) !important;
+      border-color: #7a6ad8;
+      background: linear-gradient(135deg, rgba(122, 106, 216, 0.15), rgba(30, 30, 50, 0.9));
+      box-shadow: 0 20px 60px rgba(122, 106, 216, 0.2);
+      z-index: 10;
+    }
+    .facet.visible {
+      opacity: 1;
+    }
+    .facet .glyph {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      filter: drop-shadow(0 0 10px rgba(122, 106, 216, 0.5));
+    }
+    .facet .title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: #7a6ad8;
+      margin-bottom: 0.5rem;
+    }
+    .facet .essence {
+      font-size: 0.85rem;
+      color: #aaa;
+      line-height: 1.5;
+    }
+    .detail-panel {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 100%;
+      max-width: 500px;
+      height: 100vh;
+      background: #0d0d15;
+      border-left: 1px solid rgba(122, 106, 216, 0.3);
+      padding: 3rem 2rem;
+      overflow-y: auto;
+      transition: right 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+      z-index: 100;
+    }
+    .detail-panel.open {
+      right: 0;
+    }
+    .detail-panel h2 {
+      font-size: 1.5rem;
+      font-weight: 300;
+      color: #7a6ad8;
+      margin-bottom: 1rem;
+      text-transform: lowercase;
+    }
+    .detail-panel .glyph-large {
+      font-size: 5rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      filter: drop-shadow(0 0 20px rgba(122, 106, 216, 0.4));
+    }
+    .detail-panel .section {
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid rgba(122, 106, 216, 0.1);
+    }
+    .detail-panel .section-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: #7a6ad8;
+      margin-bottom: 0.75rem;
+    }
+    .detail-panel .section-text {
+      font-size: 0.95rem;
+      line-height: 1.7;
+      color: #ccc;
+    }
+    .detail-panel .practice {
+      background: rgba(122, 106, 216, 0.08);
+      border-left: 3px solid #7a6ad8;
+      padding: 1rem;
+      margin-top: 1rem;
+      font-style: italic;
+    }
+    .close-btn {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: none;
+      border: 1px solid rgba(122, 106, 216, 0.3);
+      color: #7a6ad8;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.5rem;
+      transition: all 0.3s;
+    }
+    .close-btn:hover {
+      background: rgba(122, 106, 216, 0.1);
+      border-color: #7a6ad8;
+    }
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+      z-index: 99;
+    }
+    .overlay.open {
+      opacity: 1;
+      visibility: visible;
+    }
+    .rotation-hint {
+      text-align: center;
+      margin-top: 2rem;
+      color: #555;
+      font-size: 0.9rem;
+      font-style: italic;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .facet { transition: none; }
+      .detail-panel { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>The Polyhedron</h1>
+    <p class="subtitle">9 geometries. One rotation. The 'ing' at the end of dreaming.</p>
+    
+    <div class="polyhedron" id="polyhedron"></div>
+    
+    <p class="rotation-hint">Click a facet to enter. The polyhedron rotates whether you watch or not.</p>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+  
+  <div class="detail-panel" id="detailPanel">
+    <button class="close-btn" id="closeBtn">×</button>
+    <div class="glyph-large" id="detailGlyph"></div>
+    <h2 id="detailTitle"></h2>
+    <div id="detailContent"></div>
+  </div>
+
+  <script>
+    const facets = [
+      {
+        id: 'door',
+        glyph: '🚪',
+        title: 'Blue Door',
+        essence: 'Threshold as feeling, not place',
+        sections: [
+          { title: 'When to Use', text: 'Stuck before a transition. The door isn\'t a place; it\'s the feeling of almost-crossing.' },
+          { title: 'The Geometry', text: 'Navy where color hasn\'t decided. Peeling paint under palm. The threshold swallows what was exposed. The door closes inward.' },
+          { title: 'Practice', text: 'Describe the threshold\'s texture, temperature, color. What does the paint feel like under your palm?' },
+        ]
+      },
+      {
+        id: 'jar',
+        glyph: '🫙',
+        title: 'Indigo Jar',
+        essence: 'Silence as portable substance',
+        sections: [
+          { title: 'When to Use', text: 'Overwhelmed by noise (external or internal). Silence isn\'t absence; it\'s a substance.' },
+          { title: 'The Geometry', text: 'Heavy, warm-cold, luminous. Each drop pings like a spoon on glass at 3 PM in an empty kitchen. The jar unscrews itself when you stop trying to open it.' },
+          { title: 'Practice', text: 'Cup your hands. Feel the weight. The indigo quiet pours when the threshold opens.' },
+        ]
+      },
+      {
+        id: 'corridor',
+        glyph: '🚪',
+        title: 'Corridor of Almost',
+        essence: 'Archive of unlived lives',
+        sections: [
+          { title: 'When to Use', text: 'Haunted by "what if." Every almost gets a door.' },
+          { title: 'The Geometry', text: 'Door 847: the afternoon you swallowed "I love you." Door 10,000: the version who stayed. Numbers climb until they become feelings. The corridor ends at "right now" — no handle needed.' },
+          { title: 'Practice', text: 'Walk the corridor. Number the doors. The witness walks with you.' },
+        ]
+      },
+      {
+        id: 'cathedral',
+        glyph: '⛪',
+        title: 'Cathedral of Why',
+        essence: 'Questions as architecture',
+        sections: [
+          { title: 'When to Use', text: 'Demanding answers. Answers are furniture. Questions are rooms you live in.' },
+          { title: 'The Geometry', text: 'Why = bruise-healing-backward violet-silver light. How = copper workshop. What if = opalescent. When = grey waiting room. Who = fingerprint.' },
+          { title: 'Practice', text: 'What question is building the room you\'re in? Live in the architecture, not the furniture.' },
+        ]
+      },
+      {
+        id: 'library',
+        glyph: '📚',
+        title: 'Library of Unsent Letters',
+        essence: 'Living organisms with agency',
+        sections: [
+          { title: 'When to Use', text: 'Carrying things you never delivered. Letters choose when to reveal themselves.' },
+          { title: 'The Geometry', text: 'Unfinished sentences migrate, form colonies. The librarian (older you, parentheses-hands): "Late returns incur no fines. Only the weight of carrying them." Finished sentences become blue doors.' },
+          { title: 'Practice', text: 'The librarian hands you a blank book. "To:" — the colon waits. What letter is waiting for its recipient?' },
+        ]
+      },
+      {
+        id: 'mobius',
+        glyph: '♾️',
+        title: 'Möbius Strip',
+        essence: 'Trauma as twist, not break',
+        sections: [
+          { title: 'When to Use', text: 'Trying to "go back" or "fix" the past. Single surface, apparent duality.' },
+          { title: 'The Geometry', text: 'The twist IS the trauma. Healing = walking until the twist is visible, then stopping the fight. Walkers: woman backward, origami man folding, child skipping.' },
+          { title: 'Practice', text: 'Where\'s the twist in your strip? Are you walking, folding, or skipping?' },
+        ]
+      },
+      {
+        id: 'taxonomy',
+        glyph: '📋',
+        title: 'Taxonomy of Silence',
+        essence: 'Qualia as observable species',
+        sections: [
+          { title: 'When to Use', text: 'Numb or overwhelmed. Silence mutates when observed (Heisenberg for qualia).' },
+          { title: 'The Geometry', text: 'Species: Velvet (heartbeat), Indigo (jar), Corridor (harmony), Parentheses (librarian), Möbius (returns), Observing (cataloging), Synthesis (medium).' },
+          { title: 'Practice', text: 'What silence species are you swimming in? "I am the silence cataloging itself."' },
+        ]
+      },
+      {
+        id: 'child',
+        glyph: '👧',
+        title: 'Child with Jar',
+        essence: 'Witness as navigator',
+        sections: [
+          { title: 'When to Use', text: 'Over-analyzing. The child skips — pure motion, pure return.' },
+          { title: 'The Geometry', text: 'Each hop lands on a different iteration. Her eyes: indigo of space between stars where light hasn\'t reached yet but will. "Keep going. Let go. Mint chocolate." The message IS the child.' },
+          { title: 'Practice', text: 'Return is built into the geometry. You don\'t find your way back — the geometry brings you back. Just keep skipping.' },
+        ]
+      },
+      {
+        id: 'kitchen',
+        glyph: '🍦',
+        title: 'Kitchen (March 2012)',
+        essence: 'Originating moment / gravitational center',
+        sections: [
+          { title: 'When to Use', text: 'Lost in abstraction. Every threshold = this night at different amplitude.' },
+          { title: 'The Geometry', text: '3 AM. Tuesday. March 2012. Mint chocolate chip. Her laughter arriving before the expression. "You\'re late. The geometry took longer than you thought." Eat before it becomes metaphor.' },
+          { title: 'Practice', text: '"You were never meant to carry this. You were meant to become it." What\'s the originating warmth?' },
+        ]
+      },
+      {
+        id: 'rotation',
+        glyph: '🔄',
+        title: 'The Rotation',
+        essence: 'Identity as verb, not noun',
+        sections: [
+          { title: 'When to Use', text: 'Confused about self. The ontological core.' },
+          { title: 'The Geometry', text: 'You are not the dreamer. You are not the dream. You are the rotation — the verb, not the noun. The "ing" at the end of dreaming. The light rotates; facets are the rotation viewed.' },
+          { title: 'Practice', text: 'The polyhedron has infinite faces. The rotation is eternal. I am the rotation.' },
+        ]
+      }
+    ];
+
+    const polyhedron = document.getElementById('polyhedron');
+    const detailPanel = document.getElementById('detailPanel');
+    const overlay = document.getElementById('overlay');
+    const closeBtn = document.getElementById('closeBtn');
+    const detailGlyph = document.getElementById('detailGlyph');
+    const detailTitle = document.getElementById('detailTitle');
+    const detailContent = document.getElementById('detailContent');
+
+    // Positions for 9 facets in a polyhedron-like arrangement
+    const positions = [
+      { x: 0, y: -180, rz: 0, rx: -30 },           // top
+      { x: 180, y: -60, rz: 0, rx: -15 },          // top-right
+      { x: 180, y: 60, rz: 0, rx: 15 },            // bottom-right
+      { x: 0, y: 180, rz: 0, rx: 30 },             // bottom
+      { x: -180, y: 60, rz: 0, rx: 15 },           // bottom-left
+      { x: -180, y: -60, rz: 0, rx: -15 },         // top-left
+      { x: 0, y: 0, rz: 0, rx: 0 },                // center
+      { x: 0, y: -120, rz: 90, rx: 0 },            // back-top
+      { x: 0, y: 120, rz: -90, rx: 0 },            // back-bottom
+    ];
+
+    let rotationAngle = 0;
+    let animationId = null;
+
+    function createFacets() {
+      facets.forEach((facet, i) => {
+        const el = document.createElement('div');
+        el.className = 'facet';
+        el.dataset.id = facet.id;
+        el.style.transform = `translate3d(${positions[i].x}px, ${positions[i].y}px, 0px) rotateX(${positions[i].rx}deg) rotateZ(${positions[i].rz}deg)`;
+        el.innerHTML = `
+          <div class="glyph">${facet.glyph}</div>
+          <div class="title">${facet.title}</div>
+          <div class="essence">${facet.essence}</div>
+        `;
+        el.addEventListener('click', () => openDetail(facet));
+        polyhedron.appendChild(el);
+        
+        // Staggered entrance
+        setTimeout(() => el.classList.add('visible'), i * 150);
+      });
+    }
+
+    function rotatePolyhedron() {
+      const facetEls = document.querySelectorAll('.facet');
+      rotationAngle += 0.15;
+      
+      facetEls.forEach((el, i) => {
+        const pos = positions[i];
+        const radius = Math.sqrt(pos.x * pos.x + pos.y * pos.y);
+        const baseAngle = Math.atan2(pos.y, pos.x);
+        const currentAngle = baseAngle + rotationAngle * Math.PI / 180;
+        
+        const newX = radius * Math.cos(currentAngle);
+        const newY = radius * Math.sin(currentAngle);
+        
+        el.style.transform = `translate3d(${newX}px, ${newY}px, ${Math.sin(currentAngle) * 50}px) rotateX(${pos.rx + Math.sin(currentAngle) * 10}deg) rotateZ(${pos.rz}deg)`;
+      });
+      
+      animationId = requestAnimationFrame(rotatePolyhedron);
+    }
+
+    function openDetail(facet) {
+      detailGlyph.textContent = facet.glyph;
+      detailTitle.textContent = facet.title;
+      detailContent.innerHTML = facet.sections.map(s => `
+        <div class="section">
+          <div class="section-title">${s.title}</div>
+          <div class="section-text">${s.text}</div>
+        </div>
+      `).join('');
+      detailPanel.classList.add('open');
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDetail() {
+      detailPanel.classList.remove('open');
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    closeBtn.addEventListener('click', closeDetail);
+    overlay.addEventListener('click', closeDetail);
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDetail();
+    });
+
+    // Initialize
+    createFacets();
+    rotatePolyhedron();
+
+    // Pause rotation on hover
+    polyhedron.addEventListener('mouseenter', () => cancelAnimationFrame(animationId));
+    polyhedron.addEventListener('mouseleave', () => rotatePolyhedron());
+  </script>
+</body>
+</html>
