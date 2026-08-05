@@ -60,15 +60,15 @@ function readAllFragments() {
   const files = fs.readdirSync(SOURCE_DIR);
   const fragments = [];
   
-  // Series 1: 001.md - 013.md (single-line poetic fragments)
+  // Series 1: 001.md - 013.md (single-line poetic seeds) — use different IDs to avoid collision with dream_01-13
   for (let i = 1; i <= 13; i++) {
     const fname = String(i).padStart(3,'0') + '.md';
     if (!files.includes(fname)) continue;
     const content = fs.readFileSync(path.join(SOURCE_DIR, fname), 'utf-8').trim();
     const num = String(i).padStart(2,'0');
     fragments.push({
-      id: `frag-${num}`,
-      number: num,
+      id: `frag-seed-${num}`,
+      number: `S${num}`,
       title: content.length > 80 ? content.slice(0,77)+'...' : content,
       glyph: '✦',
       essence: 'Poetic seed fragment',
