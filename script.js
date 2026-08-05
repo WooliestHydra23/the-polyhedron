@@ -122,14 +122,22 @@ function initSearchAndFilter() {
 
   function renderFragmentList() {
     const filtered = fragmentsData.filter(f => {
-      const matchesFilter = currentFilter === 'all' || f.id.startsWith(currentFilter.replace('core-', 'frag-')) || (currentFilter.startsWith('core-') && f.id.startsWith('frag-' + currentFilter.split('-')[1]));
-      // Better filter: check if fragment belongs to this chapter
-      const chapterNum = currentFilter.match(/\d+/);
-      const matchesChapter = !chapterNum || f.number === chapterNum[0].padStart(2,'0') || f.number === 'S' + chapterNum[0].padStart(2,'0');
+      let matchesFilter = false;
+      if (currentFilter === 'all') {
+        matchesFilter = true;
+      } else if (currentFilter.startsWith('core-')) {
+        // Extract chapter number (e.g., "core-01" -> "01")
+        const chapterNum = currentFilter.match(/\d+/);
+        if (chapterNum) {
+          const num = chapterNum[0].padStart(2,'0');
+          // Match both frag-XX and frag-seed-XX for this chapter
+          matchesFilter = f.number === num || f.number === 'S' + num;
+        }
+      }
       const matchesSearch = !searchTerm || 
         f.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         f.essence.toLowerCase().includes(searchTerm.toLowerCase());
-      return (currentFilter === 'all' || matchesChapter) && matchesSearch;
+      return matchesFilter && matchesSearch;
     });
 
     fragmentList.innerHTML = filtered.map(f => 
