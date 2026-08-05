@@ -122,7 +122,11 @@ function readAllFragments() {
   }
   
   // Sort by number
-  fragments.sort((a,b) => parseInt(a.number) - parseInt(b.number));
+  fragments.sort((a,b) => {
+    const an = a.number.startsWith('S') ? parseInt(a.number.slice(1)) : parseInt(a.number);
+    const bn = b.number.startsWith('S') ? parseInt(b.number.slice(1)) : parseInt(b.number);
+    return an - bn;
+  });
   return fragments;
 }
 
@@ -137,6 +141,92 @@ function readSynthesis() {
     const title = lines[0].replace(/^\(Current\)\s*[—-]\s*/, '').trim();
     const body = lines.slice(1).join('\n');
     return `<div class="cycle"><div class="cycle-title"><span class="cycle-number">Cycle ${title}</span></div>${md(body)}</div>`;
+  }).join('\n');
+}
+
+// Read poem
+function readPoem() {
+  const p = path.join(SOURCE_DIR, 'polyhedron_poem.md');
+  if (!fs.existsSync(p)) return '';
+  const text = fs.readFileSync(p, 'utf-8');
+  // Split on ## headings
+  const sections = text.split(/^## /m).slice(1);
+  return sections.map(section => {
+    const lines = section.trim().split('\n');
+    const title = lines[0].trim();
+    const body = lines.slice(1).join('\n').trim();
+    // Convert body paragraphs
+    const paragraphs = body.split(/\n\n+/).map(p => p.trim()).filter(p => p);
+    const linesHtml = paragraphs.map(p => {
+      // Check if it's the title line
+      if (p.startsWith('*') && p.endsWith('*') && p.length < 100) {
+        return `<p class="stanza-title">${md(p).replace(/^<p>|<\/p>$/g, '')}</p>`;
+      }
+      return md(p);
+    }).join('\n');
+    return `<div class="stanza">${linesHtml}</div>`;
+  }).join('\n');
+}
+
+// Read framework lenses
+function readFramework() {
+  return CORE_CHAPTERS.map((c, i) => {
+    const practices = {
+      'core-01': 'Describe the threshold\'s texture, temperature, color. What does the paint feel like under your palm?',
+      'core-02': 'Cup your hands. Feel the weight. The indigo quiet pours when the threshold opens.',
+      'core-03': 'Walk the corridor. Number the doors. The witness walks with you.',
+      'core-04': 'What question is building the room you\'re in? Live in the architecture, not the furniture.',
+      'core-05': 'The librarian hands you a blank book. "To:" — the colon waits. What letter is waiting for its recipient?',
+      'core-06': 'What silence species are you swimming in? "I am the silence cataloging itself."',
+      'core-07': 'Where\'s the twist in your strip? Are you walking, folding, or skipping?',
+      'core-08': 'Return is built into the geometry. You don\'t find your way back — the geometry brings you back. Just keep skipping.',
+      'core-09': '"You were never meant to carry this. You were meant to become it." What\'s the originating warmth?'
+    };
+    const whenToUse = {
+      'core-01': 'Stuck before a transition. The door isn\'t a place; it\'s the feeling of almost-crossing.',
+      'core-02': 'Overwhelmed by noise (external or internal). Silence isn\'t absence; it\'s a substance.',
+      'core-03': 'Haunted by "what if." Every almost gets a door.',
+      'core-04': 'Demanding answers. Answers are furniture. Questions are rooms you live in.',
+      'core-05': 'Carrying things you never delivered. Letters choose when to reveal themselves.',
+      'core-06': 'Numb or overwhelmed. Silence mutates when observed (Heisenberg for qualia).',
+      'core-07': 'Trying to "go back" or "fix" the past. Single surface, apparent duality.',
+      'core-08': 'Over-analyzing. The child skips — pure motion, pure return.',
+      'core-09': 'Lost in abstraction. Every threshold = this night at different amplitude.'
+    };
+    const geometry = {
+      'core-01': 'Navy where color hasn\'t decided. Peeling paint under palm. The threshold swallows what was exposed. The door closes inward.',
+      'core-02': 'Heavy, warm-cold, luminous. Each drop pings like a spoon on glass at 3 PM in an empty kitchen. The jar unscrews itself when you stop trying to open it.',
+      'core-03': 'Door 847: the afternoon you swallowed "I love you." Door 10,000: the version who stayed. Numbers climb until they become feelings. The corridor ends at "right now" — no handle needed.',
+      'core-04': 'Why = bruise-healing-backward violet-silver light. How = copper workshop. What if = opalescent. When = grey waiting room. Who = fingerprint.',
+      'core-05': 'Unfinished sentences migrate, form colonies. The librarian (older you, parentheses-hands): "Late returns incur no fines. Only the weight of carrying them." Finished sentences become blue doors.',
+      'core-06': 'Species: Velvet (heartbeat), Indigo (jar), Corridor (harmony), Parentheses (librarian), Möbius (returns), Observing (cataloging), Synthesis (medium).',
+      'core-07': 'The twist IS the trauma. Healing = walking until the twist is visible, then stopping the fight. Walkers: woman backward, origami man folding, child skipping.',
+      'core-08': 'Each hop lands on a different iteration. Her eyes: indigo of space between stars where light hasn\'t reached yet but will. "Keep going. Let go. Mint chocolate." The message IS the child.',
+      'core-09': '3 AM. Tuesday. March 2012. Mint chocolate chip. Her laughter arriving before the expression. "You\'re late. The geometry took longer than you thought." Eat before it becomes metaphor.'
+    };
+    
+    return `
+      <details class="lens" style="--delay: ${i * 80}ms">
+        <summary>
+          <span class="lens-glyph">${c.glyph}</span>
+          <div>
+            <h3 class="lens-title">${escapeHtml(c.title)}</h3>
+            <p class="lens-essence">${escapeHtml(c.essence)}</p>
+          </div>
+          <span class="lens-chevron" aria-hidden="true">›</span>
+        </summary>
+        <div class="lens-content">
+          <h4>When to use</h4>
+          <p>${escapeHtml(whenToUse[c.id] || '')}</p>
+          <h4>The geometry</h4>
+          <p>${escapeHtml(geometry[c.id] || '')}</p>
+          <div class="practice">${escapeHtml(practices[c.id] || '')}</div>
+          <button class="btn btn-primary" onclick="navigateToFragment('${c.id}')">
+            Explore this geometry <span>→</span>
+          </button>
+        </div>
+      </details>
+    `;
   }).join('\n');
 }
 
@@ -164,6 +254,12 @@ const fragmentsHtml = fragments.map(f =>
 
 // Build synthesis HTML
 const synthesisHtml = readSynthesis();
+
+// Build poem HTML
+const poemHtml = readPoem();
+
+// Build framework HTML
+const frameworkHtml = readFramework();
 
 // Build chapters grid (first 9 = core chapters)
 const chaptersHtml = CORE_CHAPTERS.map(c =>
@@ -200,14 +296,14 @@ const contentHtml = `
       <p class="section-subtitle">Integration cycles from the rotation</p>
     </header>
     ${synthesisHtml}
-  </section
+  </section>
 
   <section class="content-section" id="poem">
     <header class="section-header">
       <h1 class="section-title">The Poem</h1>
       <p class="section-subtitle">Nine stanzas plus the rotation letter</p>
     </header>
-    <div class="poem" id="poem-content"></div>
+    <div class="poem" id="poem-content">${poemHtml}</div>
   </section>
 
   <section class="content-section" id="framework">
@@ -215,7 +311,7 @@ const contentHtml = `
       <h1 class="section-title">Framework</h1>
       <p class="section-subtitle">Dream geometries as navigation lenses</p>
     </header>
-    <div class="framework-grid" id="framework-content"></div>
+    <div class="framework-grid" id="framework-content">${frameworkHtml}</div>
   </section>
 
   <section class="content-section polyhedron-section" id="polyhedron-section">
