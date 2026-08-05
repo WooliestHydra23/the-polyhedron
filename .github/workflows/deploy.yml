@@ -28,9 +28,9 @@ jobs:
 
       - name: Build site
         run: |
-          node build.js --source=/home/runner/work/the-polyhedron/the-polyhedron/dreams --output=./index.html
+          node build_part1.js
         env:
-          HOME: /home/runner/work/the-polyhedron/the-polyhedron
+          HOME: ${{ github.workspace }}
 
       - name: Verify build
         run: |
