@@ -6,31 +6,94 @@
   const html = document.documentElement;
   const saved = localStorage.getItem('theme');
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  
+
   function applyTheme(theme) {
-    html.setAttribute('data-theme', theme);
+    if (theme === 'auto') {
+      html.dataset.theme = prefersDark ? 'dark' : 'light';
+    } else {
+      html.dataset.theme = theme;
+    }
     localStorage.setItem('theme', theme);
+    updateThemeToggleButton(theme);
   }
-  
+
+  function updateThemeToggleButton(theme) {
+    if (!toggle) return;
+    const labels = { light: '☀️ Light', dark: '🌙 Dark', auto: '🖥️ Auto' };
+    toggle.textContent = labels[theme] || labels.auto;
+    toggle.setAttribute('aria-label', `Current theme: ${theme}. Click to cycle.`);
+  }
+
   // Initialize
   if (saved) {
     applyTheme(saved);
-  } else if (!prefersDark) {
-    applyTheme('light');
+  } else {
+    applyTheme('auto');
   }
-  
+
   toggle.addEventListener('click', () => {
-    const current = html.getAttribute('data-theme') || (prefersDark ? 'dark' : 'light');
-    applyTheme(current === 'dark' ? 'light' : 'dark');
+    const current = localStorage.getItem('theme') || 'auto';
+    const next = current === 'light' ? 'dark' : current === 'dark' ? 'auto' : 'light';
+    applyTheme(next);
   });
-  
+
   // Listen for system preference changes
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-    if (!localStorage.getItem('theme')) {
-      applyTheme(e.matches ? 'dark' : 'light');
+    const current = localStorage.getItem('theme');
+    if (!current || current === 'auto') {
+      applyTheme('auto');
     }
   });
 })();
+
+// ===== REDUCED MOTION =====
+let reducedMotionEnabled = false;
+const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+function initReducedMotion() {
+  // Check localStorage first
+  const saved = localStorage.getItem('reducedMotion');
+  if (saved !== null) {
+    reducedMotionEnabled = saved === 'true';
+  } else {
+    reducedMotionEnabled = reducedMotionQuery.matches;
+  }
+  applyReducedMotion(reducedMotionEnabled);
+
+  // Listen for system preference changes
+  reducedMotionQuery.addEventListener('change', e => {
+    const saved = localStorage.getItem('reducedMotion');
+    if (saved === null) { // Only auto-follow if user hasn't explicitly set
+      applyReducedMotion(e.matches);
+    }
+  });
+}
+
+function applyReducedMotion(enabled) {
+  reducedMotionEnabled = enabled;
+  localStorage.setItem('reducedMotion', String(enabled));
+  
+  // Pause polyhedron rotation
+  if (enabled) {
+    if (typeof animId !== 'undefined' && animId) {
+      cancelAnimationFrame(animId);
+    }
+  } else {
+    if (typeof startRotation === 'function') {
+      startRotation();
+    }
+  }
+
+  // Disable/enable scroll-reveal animations
+  const animatedElements = document.querySelectorAll('.stanza, .lens, .chapter-card, .cycle');
+  animatedElements.forEach(el => {
+    el.style.animationPlayState = enabled ? 'running' : 'paused';
+  });
+
+  // Update checkbox in settings if it exists
+  const checkbox = document.getElementById('reducedMotionToggle');
+  if (checkbox) checkbox.checked = enabled;
+}
 
 // ===== DATA =====
 const fragmentsData = {{FRAGMENTS_JSON}};
@@ -108,9 +171,70 @@ function buildNav() {
     <li><a class="nav-link" href="#framework">🧭 The Framework</a></li>
   </ul></div>`;
 
+  // Settings section
+  const savedTheme = localStorage.getItem('theme') || 'auto';
+  const savedReducedMotion = localStorage.getItem('reducedMotion') === 'true';
+  html += `
+    <div class="nav-section">
+      <div class="nav-title">Settings</div>
+      <ul class="nav-list settings-list">
+        <li>
+          <label for="themeSelect" class="settings-label">Theme</label>
+          <select id="themeSelect" class="settings-select" aria-label="Select theme">
+            <option value="light" ${savedTheme === 'light' ? 'selected' : ''}>☀️ Light</option>
+            <option value="dark" ${savedTheme === 'dark' ? 'selected' : ''}>🌙 Dark</option>
+            <option value="auto" ${savedTheme === 'auto' ? 'selected' : ''}>🖥️ Auto</option>
+          </select>
+        </li>
+        <li>
+          <label class="settings-label checkbox-label">
+            <input type="checkbox" id="reducedMotionToggle" class="settings-checkbox" ${savedReducedMotion ? 'checked' : ''} aria-label="Reduce motion">
+            <span class="checkbox-text">Reduce Motion</span>
+          </label>
+        </li>
+      </ul>
+    </div>
+  `;
+
   nav.innerHTML = html;
   initSearchAndFilter();
   initActiveHighlighting();
+  initSettingsControls();
+}
+
+function initSettingsControls() {
+  // Theme select
+  const themeSelect = document.getElementById('themeSelect');
+  if (themeSelect) {
+    themeSelect.addEventListener('change', (e) => {
+      const theme = e.target.value;
+      const html = document.documentElement;
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      
+      if (theme === 'auto') {
+        html.dataset.theme = prefersDark ? 'dark' : 'light';
+      } else {
+        html.dataset.theme = theme;
+      }
+      localStorage.setItem('theme', theme);
+      
+      // Also update the header toggle button
+      const toggle = document.getElementById('themeToggle');
+      if (toggle) {
+        const labels = { light: '☀️ Light', dark: '🌙 Dark', auto: '🖥️ Auto' };
+        toggle.textContent = labels[theme];
+        toggle.setAttribute('aria-label', `Current theme: ${theme}. Click to cycle.`);
+      }
+    });
+  }
+
+  // Reduced motion toggle
+  const reducedMotionToggle = document.getElementById('reducedMotionToggle');
+  if (reducedMotionToggle) {
+    reducedMotionToggle.addEventListener('change', (e) => {
+      applyReducedMotion(e.target.checked);
+    });
+  }
 }
 
 function initSearchAndFilter() {
@@ -126,11 +250,9 @@ function initSearchAndFilter() {
       if (currentFilter === 'all') {
         matchesFilter = true;
       } else if (currentFilter.startsWith('core-')) {
-        // Extract chapter number (e.g., "core-01" -> "01")
         const chapterNum = currentFilter.match(/\d+/);
         if (chapterNum) {
           const num = chapterNum[0].padStart(2,'0');
-          // Match both frag-XX and frag-seed-XX for this chapter
           matchesFilter = f.number === num || f.number === 'S' + num;
         }
       }
@@ -189,6 +311,10 @@ const FACET_COUNT = 9;
 const RADIUS = 280;
 const poly = document.getElementById('polyhedron');
 let angle = 0, animId = null;
+// Keyboard rotation state
+let rotationX = -Math.PI / 6; // Initial tilt
+let rotationY = 0;
+const ROTATION_STEP = Math.PI / 36; // 5 degrees
 
 function initPolyhedron() {
   if (!poly) return;
@@ -223,35 +349,36 @@ function initPolyhedron() {
 function positionFacets() {
   const facets = document.querySelectorAll('.facet');
   const angleStep = (Math.PI * 2) / FACET_COUNT;
-  const tilt = Math.PI / 6;
   
   facets.forEach((el, i) => {
-    const theta = i * angleStep - Math.PI / 2;
-    const x = RADIUS * Math.cos(theta);
-    const y = RADIUS * Math.sin(theta) * Math.sin(tilt);
-    const z = RADIUS * Math.sin(theta) * Math.cos(tilt);
+    const theta = i * angleStep - Math.PI / 2 + rotationY;
+    const x = RADIUS * Math.cos(theta) * Math.cos(rotationX);
+    const y = RADIUS * Math.sin(theta) * Math.cos(rotationX);
+    const z = RADIUS * Math.sin(rotationX);
     const rotY = -theta + Math.PI / 2;
     
-    el.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateY(${rotY}rad) rotateX(-${tilt}rad)`;
+    el.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateY(${rotY}rad) rotateX(${-rotationX}rad)`;
   });
 }
 
 function startRotation() {
+  // Don't start if reduced motion is enabled
+  if (reducedMotionEnabled) return;
+  
   function rotate() {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (reducedMotionEnabled) return;
     angle += 0.0008;
     const facets = document.querySelectorAll('.facet');
     const angleStep = (Math.PI * 2) / FACET_COUNT;
-    const tilt = Math.PI / 6;
     
     facets.forEach((el, i) => {
-      const theta = i * angleStep - Math.PI / 2 + angle;
-      const x = RADIUS * Math.cos(theta);
-      const y = RADIUS * Math.sin(theta) * Math.sin(tilt);
-      const z = RADIUS * Math.sin(theta) * Math.cos(tilt);
+      const theta = i * angleStep - Math.PI / 2 + angle + rotationY;
+      const x = RADIUS * Math.cos(theta) * Math.cos(rotationX);
+      const y = RADIUS * Math.sin(theta) * Math.cos(rotationX);
+      const z = RADIUS * Math.sin(rotationX);
       const rotY = -theta + Math.PI / 2;
       
-      el.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateY(${rotY}rad) rotateX(-${tilt}rad)`;
+      el.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateY(${rotY}rad) rotateX(${-rotationX}rad)`;
     });
     
     animId = requestAnimationFrame(rotate);
@@ -267,13 +394,78 @@ function focusNextFacet(dir) {
   facets[nextIndex].focus();
 }
 
-poly?.addEventListener('mouseenter', () => cancelAnimationFrame(animId));
-poly?.addEventListener('mouseleave', startRotation);
+poly?.addEventListener('mouseenter', () => {
+  cancelAnimationFrame(animId);
+  polyKeyboardActive = true;
+});
+poly?.addEventListener('mouseleave', () => {
+  polyKeyboardActive = false;
+  startRotation();
+});
 
-// Pause rotation on reduced motion
+// ===== POLYHEDRON KEYBOARD NAVIGATION =====
+let polyKeyboardActive = false;
+
+function updatePolyhedronRotation() {
+  if (!poly) return;
+  positionFacets();
+}
+
+poly?.addEventListener('focusin', () => {
+  polyKeyboardActive = true;
+  cancelAnimationFrame(animId);
+});
+
+poly?.addEventListener('focusout', () => {
+  polyKeyboardActive = false;
+  startRotation();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (!polyKeyboardActive) return;
+  
+  switch (e.key) {
+    case 'ArrowUp':
+      e.preventDefault();
+      rotationX = Math.min(rotationX + ROTATION_STEP, Math.PI / 2 - 0.1);
+      updatePolyhedronRotation();
+      break;
+    case 'ArrowDown':
+      e.preventDefault();
+      rotationX = Math.max(rotationX - ROTATION_STEP, -Math.PI / 2 + 0.1);
+      updatePolyhedronRotation();
+      break;
+    case 'ArrowLeft':
+      e.preventDefault();
+      rotationY -= ROTATION_STEP;
+      updatePolyhedronRotation();
+      break;
+    case 'ArrowRight':
+      e.preventDefault();
+      rotationY += ROTATION_STEP;
+      updatePolyhedronRotation();
+      break;
+    case 'Home':
+      e.preventDefault();
+      rotationX = -Math.PI / 6;
+      rotationY = 0;
+      updatePolyhedronRotation();
+      break;
+    case 'End':
+      e.preventDefault();
+      rotationX = -Math.PI / 6;
+      rotationY = 0;
+      updatePolyhedronRotation();
+      break;
+  }
+});
+
+// Listen for reduced motion changes
 window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', e => {
-  if (e.matches) cancelAnimationFrame(animId);
-  else startRotation();
+  const saved = localStorage.getItem('reducedMotion');
+  if (saved === null) { // Only auto-follow if user hasn't explicitly set
+    applyReducedMotion(e.matches);
+  }
 });
 
 // ===== FRAGMENT ACCORDION (SMOOTH) =====
@@ -294,9 +486,10 @@ function initFragments() {
 
 // ===== SCROLL REVEAL ANIMATIONS =====
 function initScrollReveal() {
-  // Check reduced motion
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    document.querySelectorAll('.stanza, .lens, .chapter-card, .cycle').forEach(el => {
+  const animatedElements = document.querySelectorAll('.stanza, .lens, .chapter-card, .cycle');
+  
+  if (reducedMotionEnabled) {
+    animatedElements.forEach(el => {
       el.style.animationPlayState = 'running';
     });
     return;
@@ -311,7 +504,7 @@ function initScrollReveal() {
     });
   }, {threshold: 0.1, rootMargin: '0px 0px -50px 0px'});
   
-  document.querySelectorAll('.stanza, .lens, .chapter-card, .cycle').forEach(el => {
+  animatedElements.forEach(el => {
     el.style.animationPlayState = 'paused';
     observer.observe(el);
   });
@@ -328,6 +521,7 @@ if ('serviceWorker' in navigator) {
 
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
+  initReducedMotion();
   buildNav();
   initPolyhedron();
   initFragments();
