@@ -300,6 +300,10 @@
       
       // Animation loop
       let angle = 0;
+      // Separate raycaster for fragments (only active in GEOMETRY view)
+      const fragmentRaycaster = new THREE.Raycaster();
+      const fragmentMouse = new THREE.Vector2();
+      
       function animate() {
         animationId = requestAnimationFrame(animate);
         
@@ -321,6 +325,18 @@
             }
             window.atmosphereParticles.geometry.attributes.position.needsUpdate = true;
           }
+          
+          // Animate fragment particles (gentle orbital motion)
+          if (fragmentParticles && fragmentParticles.geometry) {
+            const positions = fragmentParticles.geometry.attributes.position.array;
+            for (let i = 0; i < positions.length / 3; i++) {
+              const t = Date.now() * 0.00005 + i;
+              positions[i * 3] += Math.sin(t) * 0.0002;
+              positions[i * 3 + 1] += Math.cos(t * 0.7) * 0.0002;
+              positions[i * 3 + 2] += Math.sin(t * 0.5) * 0.0002;
+            }
+            fragmentParticles.geometry.attributes.position.needsUpdate = true;
+          }
         }
         
         // Smooth camera to target
@@ -341,6 +357,24 @@
       function onClick(event) {
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        
+        // In GEOMETRY view, check fragment particles first
+        if (currentView === 'GEOMETRY' && fragmentParticles) {
+          fragmentMouse.x = mouse.x;
+          fragmentMouse.y = mouse.y;
+          fragmentRaycaster.setFromCamera(fragmentMouse, camera);
+          const fragmentIntersects = fragmentRaycaster.intersectObject(fragmentParticles);
+          
+          if (fragmentIntersects.length > 0) {
+            const intersect = fragmentIntersects[0];
+            const fragmentIndex = intersect.index;
+            const fragments = fragmentParticles.userData.fragments;
+            if (fragments && fragments[fragmentIndex]) {
+              openFragment(fragments[fragmentIndex], fragmentParticles.userData.chapterColor);
+            }
+            return;
+          }
+        }
         
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(facets);
