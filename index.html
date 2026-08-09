@@ -22,6 +22,67 @@
 
   </head>
 <body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <div id="ritual-overlay" role="dialog" aria-modal="true" aria-label="Dream induction">
+    <div class="ritual-center">
+      <div class="ritual-glyph" aria-hidden="true">🔮</div>
+      <div class="ritual-text" aria-live="polite" aria-atomic="true"></div>
+      <button class="ritual-skip" id="ritual-skip" aria-label="Skip dream induction">Enter the polyhedron now</button>
+    </div>
+  </div>
+  <div id="app">
+    <header>
+      <div class="logo">
+        <span class="logo-mark" aria-hidden="true">🔮</span>
+        <span>The Polyhedron</span>
+      </div>
+      <div class="header-actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Cycle theme: Light → Dark → Auto">
+          <svg class="icon-sun" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="23"></line><line x1="4.22" y1="19.78" x2="5.64" y2="5.64"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+          <svg class="icon-moon" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </button>
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav">☰</button>
+      </div>
+    </header>
+    <nav id="nav" role="navigation" aria-label="Main navigation"></nav>
+    <main id="main-content" role="main">
+      <div id="three-container" aria-hidden="true"></div>
+      <div id="ui-overlay" aria-hidden="true">
+        <div id="chapter-overlay" role="region" aria-label="Chapters">
+          <header class="section-header">
+            <h1 class="section-title">Chapters</h1>
+            <p class="section-subtitle">The nine geometries of the polyhedron</p>
+          </header>
+          <div class="chapters-grid" id="chapters-grid"></div>
+        </div>
+        <div id="geometry-overlay" role="region" aria-label="Geometry space">
+          <header>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span class="glyph" id="geometry-glyph" aria-hidden="true"></span>
+              <div><h2 id="geometry-title"></h2><p class="essence" id="geometry-essence"></p></div>
+            </div>
+            <button class="back-btn" id="geometry-back" aria-label="Return to polyhedron">← Return</button>
+          </header>
+          <div id="fragment-constellation" aria-hidden="true"><canvas id="fragment-canvas"></canvas></div>
+          <footer><div class="filter-group" id="geometry-filters" role="group" aria-label="Filter fragments"></div><div class="polyhedron-hint">Click a fragment to read • Drag to rotate • Scroll to zoom • ESC to return</div></footer>
+        </div>
+      </div>
+    </main>
+    <div id="fragment-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-content">
+        <header>
+          <div class="fragment-header">
+            <span class="fragment-glyph" id="modal-glyph" aria-hidden="true"></span>
+            <div><h2 class="fragment-title" id="modal-title"></h2><div class="fragment-meta" id="modal-meta"></div></div>
+            <button class="close-btn" id="modal-close" aria-label="Close fragment">&times;</button>
+          </header>
+          <div class="fragment-body" id="modal-body"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer><p>The Polyhedron — A dream archive of 121 fragments across 9 geometries. <br>The rotation continues.</p><p class="small"><a href="https://github.com/WooliestHydra23/the-polyhedron" target="_blank" rel="noopener">Source</a> • Built with Three.js & GSAP</p></footer>
+
 <script type="module">
     import * as THREE from 'three';
     import { gsap } from 'gsap';
