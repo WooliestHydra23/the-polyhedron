@@ -1271,6 +1271,8 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
 
   <script>
     // Initialize Three.js after UMD globals and modules are loaded
+    let threeInitialized = false;
+    
     window.addEventListener('load', async () => {
       console.log('[Polyhedron] INIT SCRIPT STARTED - Window loaded, waiting for globals...');
       // Wait for UMD globals
@@ -1289,11 +1291,19 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
       
       await waitForGlobals();
       console.log('[Polyhedron] All globals ready, initializing Three.js...');
+      
+      // Prevent double initialization
+      if (threeInitialized) {
+        console.log('[Polyhedron] Three.js already initialized, skipping');
+        return;
+      }
+      
       console.log('[Polyhedron] Calling initThree()...');
       
       // Call initThree
       try {
         await window.initThree();
+        threeInitialized = true;
         console.log('[Polyhedron] Three.js initialized successfully');
         console.log('[Polyhedron] initThree() returned');
       } catch (e) {
