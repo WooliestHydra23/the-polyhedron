@@ -575,6 +575,43 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
       window.addEventListener('pointermove', onPointerMove);
       window.addEventListener('click', onClick);
       
+      // Drag to rotate polyhedron (mobile + desktop)
+      window.addEventListener('pointerdown', (e) => {
+        if (currentView !== 'HUB') return;
+        isDragging = true;
+        dragStart.x = e.clientX;
+        dragStart.y = e.clientY;
+        // Capture current facet rotations as baseline
+        dragRotation.x = 0;
+        dragRotation.y = 0;
+        facets.forEach(f => {
+          dragRotation.x += f.rotation.x;
+          dragRotation.y += f.rotation.y;
+        });
+        dragRotation.x /= facets.length;
+        dragRotation.y /= facets.length;
+      });
+      
+      window.addEventListener('pointerup', () => {
+        isDragging = false;
+      });
+      
+      window.addEventListener('pointermove', (e) => {
+        if (!isDragging || currentView !== 'HUB') return;
+        
+        const deltaX = e.clientX - dragStart.x;
+        const deltaY = e.clientY - dragStart.y;
+        
+        // Rotate polyhedron based on drag
+        const sensitivity = 0.005;
+        facets.forEach((f, i) => {
+          const baseAngle = (i / facets.length) * Math.PI * 2;
+          f.rotation.y = dragRotation.y + deltaX * sensitivity;
+          f.rotation.x = dragRotation.x - deltaY * sensitivity;
+          f.lookAt(0, 0, 0);
+        });
+      });
+      
       // Keyboard navigation
       window.addEventListener('keydown', e => {
         if (e.key === 'ArrowLeft') rotatePolyhedron(-1);
