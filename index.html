@@ -328,7 +328,9 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
           session: { startedAt: Date.now(), fragmentsRead: [], geometriesVisited: [], timeInDream: 0 }, 
           allTime: { totalFragmentsRead: 0, uniqueFragmentsRead: [], totalGeometriesVisited: 0, uniqueGeometriesVisited: [], totalDreamTime: 0, lastExitSummary: null } 
         } 
-      }; 
+      };
+    window.loadFragmentsData = loadFragmentsData;
+ 
     }
     function migrate(state) { 
       const defaults = createInitialState(); 
