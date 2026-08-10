@@ -238,13 +238,13 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
   <footer><p>The Polyhedron — A dream archive of 121 fragments across 9 geometries. <br>The rotation continues.</p><p class="small"><a href="https://github.com/WooliestHydra23/the-polyhedron" target="_blank" rel="noopener">Source</a> • Built with Three.js & GSAP</p></footer>
 
 <script type="module">
-    console.log('[Polyhedron] Second module STARTED - executing...');
+    console.log('[Polyhedron] First module STARTED - executing...');
     // Error handling for module
     window.addEventListener('error', e => {
-      console.error('[Polyhedron] Second module error:', e.message, e.filename, e.lineno, e.colno, e.error);
+      console.error('[Polyhedron] First module error:', e.message, e.filename, e.lineno, e.colno, e.error);
     });
     window.addEventListener('unhandledrejection', e => {
-      console.error('[Polyhedron] Second module unhandled rejection:', e.reason);
+      console.error('[Polyhedron] First module unhandled rejection:', e.reason);
     });
     // Use UMD globals
     const THREE = window.THREE;
@@ -254,232 +254,374 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
     const CORE_CHAPTERS = [
       {n:"01", id:"core-01", title:"Core Self-Motion", glyph:"🌀", essence:"The rotation IS the consciousness — no dreamer separate from dreaming", color:0x8b7cf5},
       {n:"02", id:"core-02", title:"The Blue Door", glyph:"🚪", essence:"Threshold as feeling, not place", color:0x8b7cf5},
-      {n:"03", id:"core-03", title:"Archive of Almost", glyph:"🚪", essence:"Every unlived life gets a door; the corridor ends at right now", color:0xd4a574},
-      {n:"04", id:"core-04", title:"The Color of a Question", glyph:"🎨", essence:"Questions are architecture; answers are furniture", color:0x5cc8d8},
-      {n:"05", id:"core-05", title:"Library of Unfinished Sentences", glyph:"📚", essence:"Living organisms with agency; finished sentences become blue doors", color:0x8b7cf5},
-      {n:"06", id:"core-06", title:"Taxonomy of Silence", glyph:"📋", essence:"Qualia as observable species; silence mutates when observed", color:0x5cc8d8},
-      {n:"07", id:"core-07", title:"Möbius Strip of Return", glyph:"♾️", essence:"Trauma is a twist, not a break; healing = see the twist, stop fighting", color:0x8b7cf5},
-      {n:"08", id:"core-08", title:"Child with the Indigo Jar", glyph:"👧", essence:"Witness as navigator; the message IS the child", color:0xd4a574},
-      {n:"09", id:"core-09", title:"The Kitchen (March 2012)", glyph:"🍦", essence:"Originating moment; you were meant to become it, not carry it", color:0x5cc8d8}
-    ];
-    const FACET_COUNT = 9;
-    const RADIUS = 2.5;
-    const FACET_DATA = CORE_CHAPTERS.map((c, i) => ({index: i, data: c, color: c.color}));
-    
-    // ============ GLOBAL STATE ============
-    let scene, camera, renderer, facets = [];
-    let cameraTarget = new THREE.Vector3();
-    let currentView = 'HUB';
-    let activeFacet = null;
-    let geometrySpace = null;
-    let fragmentParticles = null;
-    let animationId = null;
-    let reducedMotion = false;
-    let fragmentsData = [];
-    
-    // ============ LOAD FRAGMENTS DATA ============
-    async function loadFragmentsData() {
-      try { 
-        const resp = await fetch('fragments.json'); 
-        if (resp.ok) return await resp.json();
-      } catch (e) { console.warn('Could not load fragments from fragments.json'); } 
-      return [];
-    }
-    
-    // ============ POEM STANZAS ============
-    const poemStanzas = [
-      {title: "I. THE BLUE DOOR", lines: ["Navy where color hasn't decided.", "Peeling paint under palm —", "the threshold swallows what was exposed.", "Not a place. A feeling.", "The door closes inward."]},
-      {title: "II. THE INDIGO JAR", lines: ["Silence that learned to glow.", "Heavy. Warm-cold paradox.", "Each drop *pings* like a spoon on glass", "at 3 PM in an empty kitchen.", "It holds what wasn't said."]},
-      {title: "III. THE GREEN CORRIDOR", lines: ["Not a hallway — a digestive tract.", "The walls breathe. Slow. Deliberate.", "Something is being broken down", "into something that can be used.", "Absorption is not passive."]},
-      {title: "IV. THE YELLOW KEY", lines: ["Not for locks. For ignition.", "Turn it and the dream starts its engine.", "The sound is not a click —", "it's the sound of a question", "finally finding its syntax."]},
-      {title: "V. THE RED THREAD", lines: ["Not Ariadne's. Yours.", "You tied it to your wrist before sleeping.", "It leads not out but through.", "Every knot a fragment you chose to keep.", "The labyrinth was never the point."]},
-      {title: "VI. THE INDIGO MIRROR", lines: ["Shows you the dream you're not having.", "The reflection blinks slower than you do.", "Its eyes hold the geometries", "you haven't dared to name.", "Recognition is a form of return."]},
-      {title: "VII. THE VIOLET SPIRAL", lines: ["Not a staircase. A spine.", "Each vertebra a cycle. Each cycle a shedding.", "You don't climb it.", "You *are* it, lengthening.", "The top is not a destination — it's the next vertebra forming."]},
-      {title: "VIII. THE WHITE VOID", lines: ["Not empty. Pregnant.", "Every fragment you've read", "every fragment you haven't", "presses against the membrane", "waiting for the pressure to become a word."]},
-      {title: "IX. THE POLYHEDRON", lines: ["Nine faces. One rotation.", "Each face a geometry. Each geometry a lens.", "The rotation IS the consciousness —", "no dreamer separate from dreaming.", "You don't read the fragments.", "The fragments read you,", "and in being read,", "you become the polyhedron.", "The rotation continues."]}
+      {n:"03", id:"core-03", title:"The Mirror Room", glyph:"🪞", essence:"Reflection as portal, not surface", color:0xd4a574},
+      {n:"04", id:"core-04", title:"The Spiral Stair", glyph:"🌀", essence:"Ascension through return", color:0xd4a574},
+      {n:"05", id:"core-05", title:"The Garden of Forking Paths", glyph:"🌿", essence:"Choice as cultivation", color:0x5cc8d8},
+      {n:"06", id:"core-06", title:"The Library of Unwritten Books", glyph:"📚", essence:"Potential as presence", color:0x5cc8d8},
+      {n:"07", id:"core-07", title:"The Clockwork Heart", glyph:"⚙️", essence:"Rhythm as truth", color:0x8b7cf5},
+      {n:"08", id:"core-08", title:"The Echo Chamber", glyph:"🔊", essence:"Resonance as reality", color:0xd4a574},
+      {n:"09", id:"core-09", title:"The Horizon Event", glyph:"🌅", essence:"Limit as invitation", color:0x5cc8d8}
     ];
     
     // ============ DREAM STATE PERSISTENCE ============
     const STORAGE_KEY = 'polyhedron:dream:v1';
-    function loadDreamState() { 
-      try { 
-        const raw = localStorage.getItem('polyhedron:dream:v1'); 
-        if (!raw) return createInitialState(); 
-        const parsed = JSON.parse(raw); 
-        return migrate(parsed); 
-      } catch (e) { 
-        console.warn('Failed to load dream state:', e); 
-        return createInitialState(); 
-      } 
-    }
-    function createInitialState() { 
-      return { 
-        dreamKey: crypto.randomUUID(), 
-        createdAt: Date.now(), 
-        lastVisitAt: Date.now(), 
-        visitCount: 1, 
-        currentState: 'ENTRY_RITUAL', 
-        lastGeometry: null, 
-        geometryScroll: 0, 
-        fragmentScroll: 0, 
-        activeFragment: null, 
-        preferences: { theme: 'auto', reducedMotion: false, skipEntryRitual: false, audioEnabled: false }, 
-        journal: { 
-          session: { startedAt: Date.now(), fragmentsRead: [], geometriesVisited: [], timeInDream: 0 }, 
-          allTime: { totalFragmentsRead: 0, uniqueFragmentsRead: [], totalGeometriesVisited: 0, uniqueGeometriesVisited: [], totalDreamTime: 0, lastExitSummary: null } 
-        } 
+    function createInitialState() {
+      return {
+        visitCount: 0,
+        lastGeometry: null,
+        currentState: 'RITUAL',
+        activeFragment: null,
+        preferences: { skipEntryRitual: false, reducedMotion: false, theme: 'auto' },
+        journal: { session: { fragmentsRead: [] }, history: [] }
       };
-    window.loadFragmentsData = loadFragmentsData;
- 
-    }
-    function migrate(state) { 
-      const defaults = createInitialState(); 
-      return deepMerge(defaults, state); 
-    }
-    function deepMerge(target, source) { 
-      const result = { ...target }; 
-      for (const key of Object.keys(source)) { 
-        if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) { 
-          result[key] = deepMerge(target[key] || {}, source[key]); 
-        } else { 
-          result[key] = source[key]; 
-        } 
-      } 
-      return result; 
-    }
-    let dreamState = loadDreamState();
-    let saveTimeout = null;
-    function saveDreamState() { 
-      if (saveTimeout) clearTimeout(saveTimeout); 
-      saveTimeout = setTimeout(() => { 
-        dreamState.lastVisitAt = Date.now(); 
-        localStorage.setItem('polyhedron:dream:v1', JSON.stringify(dreamState)); 
-      }, 100); 
     }
     
-    // ============ REDUCED MOTION ============
-    let reducedMotionEnabled = false;
-    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    function initReducedMotion() { 
-      const saved = localStorage.getItem('reducedMotion'); 
-      if (saved !== null) { 
-        reducedMotionEnabled = saved === 'true'; 
-      } else { 
-        reducedMotionEnabled = reducedMotionQuery.matches; 
-      } 
-      applyReducedMotion(reducedMotionEnabled); 
-      reducedMotionQuery.addEventListener('change', e => { 
-        const saved = localStorage.getItem('reducedMotion'); 
-        if (saved === null) applyReducedMotion(e.matches); 
-      }); 
+    function migrate(state) {
+      const initial = createInitialState();
+      return { ...initial, ...state, preferences: { ...initial.preferences, ...state.preferences }, journal: { ...initial.journal, ...state.journal } };
     }
-    function applyReducedMotion(enabled) { 
-      reducedMotionEnabled = enabled; 
-      localStorage.setItem('reducedMotion', String(enabled)); 
-      document.body.classList.toggle('reduced-motion', enabled); 
-      if (typeof pauseAnimations === 'function') pauseAnimations(enabled); 
+    
+    function loadDreamState() {
+      try {
+        const raw = localStorage.getItem('polyhedron:dream:v1');
+        if (!raw) return createInitialState();
+        const parsed = JSON.parse(raw);
+        return migrate(parsed);
+      } catch (e) {
+        console.warn('Failed to load dream state:', e);
+        return createInitialState();
+      }
+    }
+    
+    function saveDreamState(state) {
+      try {
+        localStorage.setItem('polyhedron:dream:v1', JSON.stringify(state));
+      } catch (e) {
+        console.warn('Failed to save dream state:', e);
+      }
+    }
+    
+    let dreamState = loadDreamState();
+    
+    // ============ REDUCED MOTION ============
+    function applyReducedMotion(enabled) {
+      document.body.classList.toggle('reduced-motion', enabled);
+      if (typeof pauseAnimations === 'function') pauseAnimations(enabled);
+    }
+    
+    function initReducedMotion() {
+      const saved = localStorage.getItem('reducedMotion') === 'true';
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const state = loadDreamState();
+      const enabled = state.preferences.reducedMotion || saved || prefersReduced;
+      state.preferences.reducedMotion = enabled;
+      saveDreamState(state);
+      applyReducedMotion(enabled);
     }
     
     // ============ THEME ============
-    function initTheme() { 
-      const saved = localStorage.getItem('theme') || 'auto'; 
-      const html = document.documentElement; 
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; 
-      function applyTheme(theme) { 
-        if (theme === 'auto') { 
-          html.dataset.theme = prefersDark ? 'dark' : 'light'; 
-        } else { 
-          html.dataset.theme = theme; 
-        } 
-        localStorage.setItem('theme', theme); 
-        updateThemeUI(theme); 
-      } 
-      function updateThemeUI(theme) { 
-        const toggle = document.getElementById('themeToggle'); 
-        if (toggle) { 
-          const labels = { light: '☀️ Light', dark: '🌙 Dark', auto: '🖥️ Auto' }; 
-          toggle.innerHTML = labels[theme] || labels.auto; 
-          toggle.setAttribute('aria-label', 'Current theme: ' + theme + '. Click to cycle.'); 
-        } 
-        const select = document.getElementById('themeSelect'); 
-        if (select) select.value = theme; 
-      } 
-      applyTheme(localStorage.getItem('theme') || 'auto'); 
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => { 
-        if (!localStorage.getItem('theme') || localStorage.getItem('theme') === 'auto') { 
-          applyTheme('auto'); 
-        } 
-      }); 
+    function initTheme() {
+      const saved = localStorage.getItem('theme') || 'auto';
+      const html = document.documentElement;
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      let theme = saved === 'auto' ? (prefersDark ? 'dark' : 'light') : saved;
+      html.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
     }
     
     // ============ ENTRY RITUAL ============
-    const ritualOverlay = document.getElementById('ritual-overlay');
-    const ritualText = ritualOverlay.querySelector('.ritual-text');
-    const ritualSkip = document.getElementById('ritual-skip');
-    const ritualWords = "The rotation continues...".split(' ');
-    
-    async function runEntryRitual() { 
-      return new Promise(resolve => { 
-        const state = loadDreamState(); 
-        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; 
-        if (state.preferences?.skipEntryRitual || window.matchMedia('(prefers-reduced-motion: reduce)').matches || state.visitCount > 1) { 
-          ritualOverlay.classList.add('skip'); 
-          resolve(); 
-          return; 
-        } 
-        ritualOverlay.classList.remove('hidden', 'skip'); 
-        document.body.style.overflow = 'hidden'; 
-        await sleep(500); 
-        await sleep(1000); 
-        for (let i = 0; i < 2; i++) { await sleep(2000); } 
-        ritualText.innerHTML = ''; 
-        for (let i = 0; i < ritualWords.length; i++) { 
-          const span = document.createElement('span'); 
-          span.className = 'ritual-word'; 
-          span.style.animationDelay = (i * 300) + 'ms'; 
-          span.textContent = ritualWords[i] + (i < ritualWords.length - 1 ? ' ' : ''); 
-          ritualText.appendChild(span); 
-          await sleep(300); 
-        } 
-        await sleep(500); 
-        ritualOverlay.classList.add('hidden'); 
-        document.body.style.overflow = ''; 
-        await sleep(1000); 
-        ritualOverlay.classList.add('skip'); 
-        const state = loadDreamState(); 
-        state.preferences.skipEntryRitual = true; 
-        state.visitCount++; 
-        localStorage.setItem('polyhedron:dream:v1', JSON.stringify(state)); 
-        resolve(); 
-      }); 
+    async function runEntryRitual() {
+      const ritualOverlay = document.getElementById('ritual-overlay');
+      const ritualText = document.querySelector('.ritual-text');
+      const ritualGlyph = document.querySelector('.ritual-glyph');
+      const ritualSkip = document.querySelector('.ritual-skip');
       
-      ritualSkip.addEventListener('click', () => { 
-        ritualOverlay.classList.add('hidden'); 
-        document.body.style.overflow = ''; 
-        const state = loadDreamState(); 
-        state.preferences.skipEntryRitual = true; 
-        localStorage.setItem('polyhedron:dream:v1', JSON.stringify(state)); 
-      }); 
+      if (!ritualOverlay || !ritualText || !ritualGlyph || !ritualSkip) return;
       
-      document.addEventListener('keydown', e => { 
-        if (!ritualOverlay.classList.contains('hidden') && !ritualOverlay.classList.contains('skip') && (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape')) { 
-          ritualSkip.click(); 
-        } 
-      }); 
+      const state = loadDreamState();
+      if (state.preferences.skipEntryRitual || window.matchMedia('(prefers-reduced-motion: reduce)').matches || state.visitCount > 1) {
+        ritualOverlay.classList.add('skip');
+        return;
+      }
+      
+      return new Promise(resolve => {
+        const ritualWords = ['The', 'rotation', 'continues.'];
+        let wordIndex = 0;
+        
+        function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+        
+        async function runRitual() {
+          ritualOverlay.classList.remove('hidden', 'skip');
+          document.body.style.overflow = 'hidden';
+          
+          // Phase 1: Black screen with grain (0-0.5s)
+          await sleep(500);
+          
+          // Phase 2: Breathing glyph (0.5-1.5s)
+          for (let i = 0; i < 2; i++) {
+            ritualGlyph.style.transform = 'scale(1.2)';
+            await sleep(1000);
+            ritualGlyph.style.transform = 'scale(1)';
+            await sleep(1000);
+          }
+          
+          // Phase 3: Breathing text (1.5-3.5s)
+          for (let i = 0; i < ritualWords.length; i++) {
+            const span = document.createElement('span');
+            span.className = 'ritual-word';
+            span.style.animationDelay = (i * 300) + 'ms';
+            span.textContent = ritualWords[i] + (i < ritualWords.length - 1 ? ' ' : '');
+            ritualText.appendChild(span);
+            await sleep(300);
+          }
+          
+          // Phase 4: Dissolve (3.5-4.5s)
+          await sleep(500);
+          ritualOverlay.classList.add('hidden');
+          document.body.style.overflow = '';
+          await sleep(1000);
+          ritualOverlay.classList.add('skip');
+          
+          state.visitCount++;
+          state.preferences.skipEntryRitual = true;
+          localStorage.setItem('polyhedron:dream:v1', JSON.stringify(state));
+          resolve();
+        }
+        
+        ritualSkip.addEventListener('click', () => {
+          ritualOverlay.classList.add('hidden');
+          document.body.style.overflow = '';
+          state.preferences.skipEntryRitual = true;
+          localStorage.setItem('polyhedron:dream:v1', JSON.stringify(state));
+          resolve();
+        });
+        
+        document.addEventListener('keydown', e => {
+          if (!ritualOverlay.classList.contains('hidden') && !ritualOverlay.classList.contains('skip') && (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape')) {
+            ritualSkip.click();
+          }
+        });
+        
+        runRitual();
+      });
     }
     
     function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
     
-    initReducedMotion();
-    initTheme();
-    await runEntryRitual();
-        initUI();
-    await loadAndBuild();
+    // ============ FRAGMENTS DATA ============
+    async function loadFragmentsData() {
+      try {
+        const resp = await fetch('fragments.json');
+        if (resp.ok) return await resp.json();
+      } catch (e) {
+        console.warn('Could not load fragments from fragments.json, using embedded data');
+      }
+      return [];
+    }
+    
+    let fragmentsData = [];
+    
+    function getFacetData() {
+      return window.CORE_CHAPTERS || [];
+    }
+    
+    // ============ UI INITIALIZATION ============
+    function initUI() {
+      // Theme toggle
+      const themeToggle = document.getElementById('themeToggle');
+      if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+          const current = localStorage.getItem('theme') || 'auto';
+          const next = current === 'auto' ? 'light' : current === 'light' ? 'dark' : 'auto';
+          localStorage.setItem('theme', next);
+          initTheme();
+        });
+      }
+      
+      // Nav toggle
+      const navToggle = document.getElementById('navToggle');
+      const nav = document.getElementById('nav');
+      if (navToggle && nav) {
+        navToggle.addEventListener('click', () => {
+          nav.classList.toggle('open');
+          navToggle.setAttribute('aria-expanded', nav.classList.contains('open'));
+        });
+      }
+      
+      // Build navigation
+      buildNavigation();
+      
+      // Geometry back button
+      const geometryBack = document.getElementById('geometry-back');
+      if (geometryBack) {
+        geometryBack.addEventListener('click', () => {
+          if (typeof window.exitGeometry === 'function') window.exitGeometry();
+        });
+      }
+      
+      // Fragment modal close
+      const modalClose = document.getElementById('modal-close');
+      if (modalClose) {
+        modalClose.addEventListener('click', () => {
+          if (typeof window.closeFragment === 'function') window.closeFragment();
+        });
+      }
+      
+      // Settings
+      buildSettings();
+    }
+    
+    function buildNavigation() {
+      const nav = document.getElementById('nav');
+      if (!nav) return;
+      
+      let html = '';
+      
+      // Search
+      html += '<div class="nav-section"><div class="nav-title">Search</div>';
+      html += '<div class="nav-search"><label for="nav-search">Search fragments</label>';
+      html += '<input type="search" id="nav-search" placeholder="Search fragments..."></div></div>';
+      
+      // Chapters
+      html += '<div class="nav-section"><div class="nav-title">Chapters</div><ul class="nav-list">';
+      getFacetData().forEach((chapter, i) => {
+        html += `<li><a href="#" class="nav-link chapter" data-chapter="${i}">${chapter.n} ${chapter.title}</a></li>`;
+      });
+      html += '</ul></div>';
+      
+      // Geometry filters
+      html += '<div class="nav-section"><div class="nav-title">Filters</div><div class="geometry-filters">';
+      const types = ['all', 'seed', 'insight', 'synthesis'];
+      types.forEach(t => {
+        html += `<button class="filter-btn${t === 'all' ? ' active' : ''}" data-filter="${t}">${t.charAt(0).toUpperCase() + t.slice(1)}</button>`;
+      });
+      html += '</div></div>';
+      
+      // Settings
+      html += '<div class="nav-section"><div class="nav-title">Settings</div>';
+      html += '<div class="settings-list">';
+      html += '<div class="settings-label">Theme</div>';
+      html += '<select class="settings-select" id="themeSelect">';
+      html += '<option value="auto">Auto</option>';
+      html += '<option value="light">Light</option>';
+      html += '<option value="dark">Dark</option>';
+      html += '</select>';
+      html += '<label class="checkbox-label">';
+      html += '<input type="checkbox" class="settings-checkbox" id="reducedMotionToggle">';
+      html += '<span class="checkbox-text">Reduce Motion</span>';
+      html += '</label>';
+      html += '</div></div>';
+      
+      nav.innerHTML = html;
+      
+      // Event listeners
+      nav.querySelectorAll('.nav-link.chapter').forEach(link => {
+        link.addEventListener('click', e => {
+          e.preventDefault();
+          const chapterIndex = parseInt(link.dataset.chapter);
+          document.getElementById('chapter-overlay').classList.add('visible');
+          nav.classList.remove('open');
+        });
+      });
+      
+      nav.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          nav.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+        });
+      });
+    }
+    
+    function buildSettings() {
+      const themeSelect = document.getElementById('themeSelect');
+      if (themeSelect) {
+        themeSelect.value = localStorage.getItem('theme') || 'auto';
+        themeSelect.addEventListener('change', () => {
+          localStorage.setItem('theme', themeSelect.value);
+          initTheme();
+        });
+      }
+      
+      const reducedMotionToggle = document.getElementById('reducedMotionToggle');
+      if (reducedMotionToggle) {
+        reducedMotionToggle.checked = localStorage.getItem('reducedMotion') === 'true';
+        reducedMotionToggle.addEventListener('change', () => {
+          applyReducedMotion(reducedMotionToggle.checked);
+        });
+      }
+    }
+    
+    function buildChapterCards() {
+      const grid = document.getElementById('chapters-grid');
+      if (!grid) return;
+      
+      grid.innerHTML = getFacetData().map((chapter, i) => `
+        <article class="chapter-card" data-chapter="${i}" tabindex="0">
+          <span class="chapter-icon">${chapter.glyph}</span>
+          <h3 class="chapter-title">${chapter.title}</h3>
+          <p class="chapter-essence">${chapter.essence}</p>
+          <div class="chapter-meta">
+            <span>${chapter.n}</span>
+            <span class="nav-badge">${chapter.id}</span>
+          </div>
+          <a href="#" class="chapter-link">Enter geometry</a>
+        </article>
+      `).join('');
+      
+      grid.querySelectorAll('.chapter-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const chapterIndex = parseInt(card.dataset.chapter);
+          document.getElementById('chapter-overlay').classList.remove('visible');
+          if (typeof window.enterGeometry === 'function') window.enterGeometry(chapterIndex);
+        });
+        card.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            card.click();
+          }
+        });
+      });
+    }
+    
+    // ============ LOAD AND BUILD ============
+    async function loadAndBuild() {
+      fragmentsData = await loadFragmentsData();
+      buildChapterCards();
+      buildNavigation();
+      buildSettings();
+      
+      // Check for saved state
+      if (dreamState.lastGeometry && dreamState.currentState === 'GEOMETRY_SPACE') {
+        const chapterIndex = getFacetData().findIndex(c => c.id === dreamState.lastGeometry);
+        if (chapterIndex >= 0) {
+          setTimeout(() => {
+            if (typeof window.enterGeometry === 'function') window.enterGeometry(chapterIndex);
+          }, 500);
+        }
+      }
+    }
+    
+    // Global functions
+    window.enterGeometry = enterGeometry;
+    window.exitGeometry = exitGeometry;
+    window.openFragment = openFragment;
+    window.closeFragment = closeFragment;
+    window.loadAndBuild = loadAndBuild;
+    window.buildChapterCards = buildChapterCards;
+    window.buildNavigation = buildNavigation;
+    window.buildSettings = buildSettings;
+    window.initTheme = initTheme;
+    window.initReducedMotion = initReducedMotion;
+    window.saveDreamState = saveDreamState;
+    window.loadDreamState = loadDreamState;
+    window.loadFragmentsData = loadFragmentsData;
+    
     window.CORE_CHAPTERS = CORE_CHAPTERS;
-  </script>
+    
+    console.log("[Polyhedron] First module: exporting globals");
+</script>
 
   <script type="module">
-    // Initialize Three.js after UMD globals and modules are loaded
     console.log('[Polyhedron] Second module STARTED - executing...');
     // Error handling for module
     window.addEventListener('error', e => {
@@ -496,7 +638,6 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
     const RADIUS = 3;
     const FACET_COUNT = 9;
     
-    // Get chapter data from first module (exported to window)
     function getFacetData() {
       return window.CORE_CHAPTERS || [];
     }
@@ -514,7 +655,6 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
     let dragStart = { x: 0, y: 0 };
     let dragRotation = { x: 0, y: 0 };
     
-    // Dream state (load from localStorage or initialize)
     let dreamState = {
       visitCount: 0,
       lastGeometry: null,
@@ -887,6 +1027,7 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
       });
       
       // Show geometry overlay
+      const overlay = document.getElementById('geometry-overlay');
       const FACET_DATA = getFacetData();
       const chapter = FACET_DATA[index];
       document.getElementById('geometry-glyph').textContent = chapter.glyph;
@@ -903,7 +1044,7 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
     }
     
     function createGeometrySpace(chapterIndex) {
-      const chapter = CORE_CHAPTERS[chapterIndex];
+      const chapter = getFacetData()[chapterIndex];
       
       // Create a new scene for geometry space
       geometrySpace = new THREE.Group();
@@ -939,7 +1080,7 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
         fragmentsData = await loadFragmentsData();
       }
       
-      const chapterId = CORE_CHAPTERS[chapterIndex].id;
+      const chapterId = getFacetData()[chapterIndex].id;
       return fragmentsData.filter(f => f.geometry === chapterId);
     }
     
@@ -968,7 +1109,7 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
         colors.set([color.r, color.g, color.b], i * 3);
         sizes[i] = 0.5 + rng() * 0.5;
         fragmentIndices[i] = i;
-      });
+      })
       
       const geometry = new THREE.BufferGeometry();
       geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
@@ -979,7 +1120,7 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
       const material = new THREE.PointsMaterial({
         size: 0.3, vertexColors: true, transparent: true, opacity: 0.8,
         sizeAttenuation: true, depthWrite: false, blending: THREE.AdditiveBlending
-      });
+      })
       
       const particles = new THREE.Points(geometry, material);
       particles.userData = { fragments, chapterColor };
@@ -1091,192 +1232,16 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
       }
     }
     
-    // ============ UI INITIALIZATION ============
-    function initUI() {
-      // Theme toggle
-      const themeToggle = document.getElementById('themeToggle');
-      themeToggle.addEventListener('click', () => {
-        const current = localStorage.getItem('theme') || 'auto';
-        const next = current === 'auto' ? 'light' : current === 'light' ? 'dark' : 'auto';
-        localStorage.setItem('theme', next);
-        initTheme();
-      });
-      
-      // Nav toggle
-      const navToggle = document.getElementById('navToggle');
-      const nav = document.getElementById('nav');
-      navToggle.addEventListener('click', () => {
-        nav.classList.toggle('open');
-        navToggle.setAttribute('aria-expanded', nav.classList.contains('open'));
-      });
-      
-      // Build navigation
-      buildNavigation();
-      
-      // Geometry back button
-      document.getElementById('geometry-back').addEventListener('click', exitGeometry);
-      
-      // Fragment modal close
-      document.getElementById('modal-close').addEventListener('click', closeFragment);
-      
-      // Settings
-      buildSettings();
-    }
-    
-    function buildNavigation() {
-      const nav = document.getElementById('nav');
-      let html = '';
-      
-      // Search
-      html += '<div class="nav-section"><div class="nav-title">Search</div>';
-      html += '<div class="nav-search"><label for="nav-search">Search fragments</label>';
-      html += '<input type="search" id="nav-search" placeholder="Search fragments..."></div></div>';
-      
-      // Chapters
-      html += '<div class="nav-section"><div class="nav-title">Chapters</div><ul class="nav-list">';
-      getFacetData().forEach((chapter, i) => {
-        html += `<li><a href="#" class="nav-link chapter" data-chapter="${i}">${chapter.n} ${chapter.title}</a></li>`;
-      });
-      html += '</ul></div>';
-      
-      // Geometry filters
-      html += '<div class="nav-section"><div class="nav-title">Filters</div><div class="geometry-filters">';
-      const types = ['all', 'seed', 'insight', 'synthesis'];
-      types.forEach(t => {
-        html += `<button class="filter-btn${t === 'all' ? ' active' : ''}" data-filter="${t}">${t.charAt(0).toUpperCase() + t.slice(1)}</button>`;
-      });
-      html += '</div></div>';
-      
-      // Settings
-      html += '<div class="nav-section"><div class="nav-title">Settings</div>';
-      html += '<div class="settings-list">';
-      html += '<div class="settings-label">Theme</div>';
-      html += '<select class="settings-select" id="themeSelect">';
-      html += '<option value="auto">Auto</option>';
-      html += '<option value="light">Light</option>';
-      html += '<option value="dark">Dark</option>';
-      html += '</select>';
-      html += '<label class="checkbox-label">';
-      html += '<input type="checkbox" class="settings-checkbox" id="reducedMotionToggle">';
-      html += '<span class="checkbox-text">Reduce Motion</span>';
-      html += '</label>';
-      html += '</div></div>';
-      
-      nav.innerHTML = html;
-      
-      // Event listeners
-      nav.querySelectorAll('.nav-link.chapter').forEach(link => {
-        link.addEventListener('click', e => {
-          e.preventDefault();
-          const chapterIndex = parseInt(link.dataset.chapter);
-          // Show chapter overlay
-          document.getElementById('chapter-overlay').classList.add('visible');
-          nav.classList.remove('open');
-        });
-      });
-      
-      nav.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          nav.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          // Filter fragments in current geometry
-        });
-      });
-    }
-    
-    function buildSettings() {
-      const themeSelect = document.getElementById('themeSelect');
-      if (themeSelect) {
-        themeSelect.value = localStorage.getItem('theme') || 'auto';
-        themeSelect.addEventListener('change', () => {
-          localStorage.setItem('theme', themeSelect.value);
-          initTheme();
-        });
-      }
-      
-      const reducedMotionToggle = document.getElementById('reducedMotionToggle');
-      if (reducedMotionToggle) {
-        reducedMotionToggle.checked = localStorage.getItem('reducedMotion') === 'true';
-        reducedMotionToggle.addEventListener('change', () => {
-          applyReducedMotion(reducedMotionToggle.checked);
-        });
-      }
-    }
-    
-    function buildChapterCards() {
-      const grid = document.getElementById('chapters-grid');
-      if (!grid) return;
-      
-      grid.innerHTML = getFacetData().map((chapter, i) => `
-        <article class="chapter-card" data-chapter="${i}" tabindex="0">
-          <span class="chapter-icon">${chapter.glyph}</span>
-          <h3 class="chapter-title">${chapter.title}</h3>
-          <p class="chapter-essence">${chapter.essence}</p>
-          <div class="chapter-meta">
-            <span>${chapter.n}</span>
-            <span class="nav-badge">${chapter.id}</span>
-          </div>
-          <a href="#" class="chapter-link">Enter geometry</a>
-        </article>
-      `).join('');
-      
-      grid.querySelectorAll('.chapter-card').forEach(card => {
-        card.addEventListener('click', () => {
-          const chapterIndex = parseInt(card.dataset.chapter);
-          document.getElementById('chapter-overlay').classList.remove('visible');
-          enterGeometry(chapterIndex);
-        });
-        card.addEventListener('keydown', e => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            card.click();
-          }
-        });
-      });
-    }
-    
-    // ============ LOAD AND BUILD ============
-    async function loadAndBuild() {
-      fragmentsData = await loadFragmentsData();
-      buildChapterCards();
-      buildNavigation();
-      buildSettings();
-      
-      // Check for saved state
-      if (dreamState.lastGeometry && dreamState.currentState === 'GEOMETRY_SPACE') {
-        const chapterIndex = getFacetData().findIndex(c => c.id === dreamState.lastGeometry);
-        if (chapterIndex >= 0) {
-          // Delay to let Three.js initialize
-          setTimeout(() => enterGeometry(chapterIndex), 500);
-        }
-      }
-    }
-    
     // Global functions
-        // Global functions
     window.enterGeometry = enterGeometry;
     window.exitGeometry = exitGeometry;
     window.openFragment = openFragment;
     window.closeFragment = closeFragment;
-    window.loadAndBuild = loadAndBuild;
-    window.buildChapterCards = buildChapterCards;
-    window.buildNavigation = buildNavigation;
-    window.buildSettings = buildSettings;
-    window.initTheme = initTheme;
-    window.initReducedMotion = initReducedMotion;
-    window.saveDreamState = saveDreamState;
-    window.loadDreamState = loadDreamState;
- 
-    // Call loadAndBuild to initialize UI
-    loadAndBuild().then(() => {
-      console.log('[Polyhedron] loadAndBuild completed, UI initialized');
-    }).catch(e => {
-      console.error('[Polyhedron] loadAndBuild failed:', e);
-    });
- 
+    
     console.log("[Polyhedron] Second module: exporting initThree to window");
     window.initThree = initThree;
-    console.log("[Polyhedron] Second module: window.initThree exported:", typeof window.initThree);</script>
+    console.log("[Polyhedron] Second module: window.initThree exported:", typeof window.initThree);
+</script>
 
 
   <script>
