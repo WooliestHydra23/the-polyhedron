@@ -507,6 +507,7 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
     async function initThree() {
       const container = document.getElementById('three-container');
       console.log('[Polyhedron] initThree started, container:', container);
+      console.log('[Polyhedron] container.innerHTML before:', container ? container.innerHTML : 'NO CONTAINER');
       
       if (!container) {
         console.error('[Polyhedron] ERROR: three-container not found!');
@@ -516,7 +517,7 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
       // Renderer
       try {
         renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: false });
-        console.log('[Polyhedron] WebGLRenderer created');
+        console.log('[Polyhedron] WebGLRenderer created:', renderer);
       } catch (e) {
         console.error('[Polyhedron] ERROR creating WebGLRenderer:', e);
         return;
@@ -529,6 +530,7 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
       renderer.toneMappingExposure = 1;
       container.appendChild(renderer.domElement);
       console.log('[Polyhedron] Canvas appended to container');
+      console.log('[Polyhedron] container.innerHTML after:', container.innerHTML);
       
       // Scene
       scene = new THREE.Scene();
