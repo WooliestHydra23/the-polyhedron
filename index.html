@@ -1258,15 +1258,30 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
     }
     
     // Global functions
+        // Global functions
     window.enterGeometry = enterGeometry;
     window.exitGeometry = exitGeometry;
     window.openFragment = openFragment;
     window.closeFragment = closeFragment;
-  
+    window.loadAndBuild = loadAndBuild;
+    window.buildChapterCards = buildChapterCards;
+    window.buildNavigation = buildNavigation;
+    window.buildSettings = buildSettings;
+    window.initTheme = initTheme;
+    window.initReducedMotion = initReducedMotion;
+    window.saveDreamState = saveDreamState;
+    window.loadDreamState = loadDreamState;
+ 
+    // Call loadAndBuild to initialize UI
+    loadAndBuild().then(() => {
+      console.log('[Polyhedron] loadAndBuild completed, UI initialized');
+    }).catch(e => {
+      console.error('[Polyhedron] loadAndBuild failed:', e);
+    });
+ 
     console.log("[Polyhedron] Second module: exporting initThree to window");
     window.initThree = initThree;
-    console.log("[Polyhedron] Second module: window.initThree exported:", typeof window.initThree);
-</script>
+    console.log("[Polyhedron] Second module: window.initThree exported:", typeof window.initThree);</script>
 
 
   <script>
