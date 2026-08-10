@@ -10,15 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-        <script type="importmap">
-  {
-    "imports": {
-      "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/",
-      "gsap": "https://cdn.skypack.dev/gsap@3.12.5"
-    }
-  }
-  </script>
+        
   <style>
 /* ===== THE POLYHEDRON — Spatial Design System ===== */
 :root {
@@ -242,8 +234,8 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
   <footer><p>The Polyhedron — A dream archive of 121 fragments across 9 geometries. <br>The rotation continues.</p><p class="small"><a href="https://github.com/WooliestHydra23/the-polyhedron" target="_blank" rel="noopener">Source</a> • Built with Three.js & GSAP</p></footer>
 
 <script type="module">
-    import * as THREE from 'three';
-    import { gsap } from 'gsap';
+    import * as THREE from 'https://unpkg.com/three@0.158.0/build/three.module.js';
+    import { gsap } from 'https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.esm.min.js';
     
     // ============ CORE DATA ============
     const CORE_CHAPTERS = [
@@ -473,8 +465,8 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
 </body>
 </html>
   <script type="module">
-    import * as THREE from 'three';
-    import { gsap } from 'gsap';
+    import * as THREE from 'https://unpkg.com/three@0.158.0/build/three.module.js';
+    import { gsap } from 'https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.esm.min.js';
     
     // ============ THREE.JS INITIALIZATION ============
     async function initThree() {
