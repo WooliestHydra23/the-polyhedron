@@ -339,7 +339,10 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
       if (!ritualOverlay || !ritualText || !ritualGlyph || !ritualSkip) return;
       
       const state = loadDreamState();
-      if (state.preferences.skipEntryRitual || window.matchMedia('(prefers-reduced-motion: reduce)').matches || state.visitCount > 1) {
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      // Only skip on first visit if user explicitly chose to skip
+      // Respect prefers-reduced-motion by speeding up ritual, not skipping entirely
+      if (state.preferences.skipEntryRitual || (state.visitCount > 1 && prefersReducedMotion)) {
         ritualOverlay.classList.add('skip');
         return;
       }
@@ -357,29 +360,30 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
           // Phase 1: Black screen with grain (0-0.5s)
           await sleep(500);
           
-          // Phase 2: Breathing glyph (0.5-1.5s)
+          // Phase 2: Breathing glyph (0.5-1.5s) - respect reduced motion
+          const reducedMotion = prefersReducedMotion;
           for (let i = 0; i < 2; i++) {
             ritualGlyph.style.transform = 'scale(1.2)';
-            await sleep(1000);
+            await sleep(reducedMotion ? 100 : 1000);
             ritualGlyph.style.transform = 'scale(1)';
-            await sleep(1000);
+            await sleep(reducedMotion ? 100 : 1000);
           }
           
-          // Phase 3: Breathing text (1.5-3.5s)
+          // Phase 3: Breathing text (1.5-3.5s) - respect reduced motion
           for (let i = 0; i < ritualWords.length; i++) {
             const span = document.createElement('span');
             span.className = 'ritual-word';
-            span.style.animationDelay = (i * 300) + 'ms';
+            span.style.animationDelay = (i * (reducedMotion ? 50 : 300)) + 'ms';
             span.textContent = ritualWords[i] + (i < ritualWords.length - 1 ? ' ' : '');
             ritualText.appendChild(span);
-            await sleep(300);
+            await sleep(reducedMotion ? 50 : 300);
           }
           
-          // Phase 4: Dissolve (3.5-4.5s)
-          await sleep(500);
+          // Phase 4: Dissolve (3.5-4.5s) - respect reduced motion
+          await sleep(reducedMotion ? 100 : 500);
           ritualOverlay.classList.add('hidden');
           document.body.style.overflow = '';
-          await sleep(1000);
+          await sleep(reducedMotion ? 100 : 1000);
           ritualOverlay.classList.add('skip');
           
           state.visitCount++;
