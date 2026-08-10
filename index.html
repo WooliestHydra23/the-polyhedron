@@ -486,11 +486,13 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
       
       await waitForGlobals();
       console.log('[Polyhedron] All globals ready, initializing Three.js...');
+      console.log('[Polyhedron] Calling initThree()...');
       
       // Call initThree
       try {
         await window.initThree();
         console.log('[Polyhedron] Three.js initialized successfully');
+      console.log('[Polyhedron] initThree() returned');
       } catch (e) {
         console.error('[Polyhedron] initThree failed:', e);
       }
