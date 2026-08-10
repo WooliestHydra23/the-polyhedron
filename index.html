@@ -494,18 +494,10 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
     const RADIUS = 3;
     const FACET_COUNT = 9;
     
-    // Chapter data (duplicated from first module to avoid timing issues)
-    const FACET_DATA = [
-      {n:"01", id:"core-01", title:"Core Self-Motion", glyph:"🌀", essence:"The rotation IS the consciousness — no dreamer separate from dreaming", color:0x8b7cf5},
-      {n:"02", id:"core-02", title:"The Blue Door", glyph:"🚪", essence:"Threshold as feeling, not place", color:0x8b7cf5},
-      {n:"03", id:"core-03", title:"The Mirror Room", glyph:"🪞", essence:"Reflection as portal, not surface", color:0xd4a574},
-      {n:"04", id:"core-04", title:"The Spiral Stair", glyph:"🌀", essence:"Ascension through return", color:0xd4a574},
-      {n:"05", id:"core-05", title:"The Garden of Forking Paths", glyph:"🌿", essence:"Choice as cultivation", color:0x5cc8d8},
-      {n:"06", id:"core-06", title:"The Library of Unwritten Books", glyph:"📚", essence:"Potential as presence", color:0x5cc8d8},
-      {n:"07", id:"core-07", title:"The Clockwork Heart", glyph:"⚙️", essence:"Rhythm as truth", color:0x8b7cf5},
-      {n:"08", id:"core-08", title:"The Echo Chamber", glyph:"🔊", essence:"Resonance as reality", color:0xd4a574},
-      {n:"09", id:"core-09", title:"The Horizon Event", glyph:"🌅", essence:"Limit as invitation", color:0x5cc8d8}
-    ];
+    // Get chapter data from first module (exported to window)
+    function getFacetData() {
+      return window.CORE_CHAPTERS || [];
+    }
     
     let facets = [];
     let scene, camera, renderer, animationId;
@@ -734,6 +726,7 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
       const positions = geometry.attributes.position;
       
       // Create facet meshes
+      const FACET_DATA = getFacetData();
       for (let i = 0; i < FACET_COUNT; i++) {
         const facetData = FACET_DATA[i];
         
@@ -892,8 +885,8 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
       });
       
       // Show geometry overlay
-      const overlay = document.getElementById('geometry-overlay');
-      const chapter = CORE_CHAPTERS[index];
+      const FACET_DATA = getFacetData();
+      const chapter = FACET_DATA[index];
       document.getElementById('geometry-glyph').textContent = chapter.glyph;
       document.getElementById('geometry-title').textContent = chapter.title;
       document.getElementById('geometry-essence').textContent = chapter.essence;
@@ -1139,7 +1132,7 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
       
       // Chapters
       html += '<div class="nav-section"><div class="nav-title">Chapters</div><ul class="nav-list">';
-      CORE_CHAPTERS.forEach((chapter, i) => {
+      getFacetData().forEach((chapter, i) => {
         html += `<li><a href="#" class="nav-link chapter" data-chapter="${i}">${chapter.n} ${chapter.title}</a></li>`;
       });
       html += '</ul></div>';
@@ -1212,7 +1205,7 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
       const grid = document.getElementById('chapters-grid');
       if (!grid) return;
       
-      grid.innerHTML = CORE_CHAPTERS.map((chapter, i) => `
+      grid.innerHTML = getFacetData().map((chapter, i) => `
         <article class="chapter-card" data-chapter="${i}" tabindex="0">
           <span class="chapter-icon">${chapter.glyph}</span>
           <h3 class="chapter-title">${chapter.title}</h3>
@@ -1249,7 +1242,7 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
       
       // Check for saved state
       if (dreamState.lastGeometry && dreamState.currentState === 'GEOMETRY_SPACE') {
-        const chapterIndex = CORE_CHAPTERS.findIndex(c => c.id === dreamState.lastGeometry);
+        const chapterIndex = getFacetData().findIndex(c => c.id === dreamState.lastGeometry);
         if (chapterIndex >= 0) {
           // Delay to let Three.js initialize
           setTimeout(() => enterGeometry(chapterIndex), 500);
