@@ -1182,7 +1182,9 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
     window.openFragment = openFragment;
     window.closeFragment = closeFragment;
   
+    console.log("[Polyhedron] Second module: exporting initThree to window");
     window.initThree = initThree;
+    console.log("[Polyhedron] Second module: window.initThree exported:", typeof window.initThree);
 </script>
 
 
