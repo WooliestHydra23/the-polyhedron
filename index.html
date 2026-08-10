@@ -553,6 +553,19 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
         return;
       }
       
+      // Clean up existing renderer/canvas if already initialized
+      if (renderer) {
+        console.log('[Polyhedron] Cleaning up existing renderer...');
+        renderer.dispose();
+        if (renderer.domElement && renderer.domElement.parentElement) {
+          renderer.domElement.parentElement.removeChild(renderer.domElement);
+        }
+        renderer = null;
+      }
+      // Also remove any existing canvases in container
+      const existingCanvases = container.querySelectorAll('canvas');
+      existingCanvases.forEach(c => c.remove());
+      
       // Renderer
       try {
         renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: false });
