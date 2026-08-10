@@ -550,7 +550,11 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
       if (reducedMotionToggle) {
         reducedMotionToggle.checked = localStorage.getItem('reducedMotion') === 'true';
         reducedMotionToggle.addEventListener('change', () => {
-          applyReducedMotion(reducedMotionToggle.checked);
+          const enabled = reducedMotionToggle.checked;
+          applyReducedMotion(enabled);
+          const state = loadDreamState();
+          state.preferences.reducedMotion = enabled;
+          saveDreamState(state);
         });
       }
     }
