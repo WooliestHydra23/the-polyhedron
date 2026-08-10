@@ -493,7 +493,19 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
     // ============ GLOBAL STATE ============
     const RADIUS = 3;
     const FACET_COUNT = 9;
-    const FACET_DATA = window.CORE_CHAPTERS; // From first module
+    
+    // Chapter data (duplicated from first module to avoid timing issues)
+    const FACET_DATA = [
+      {n:"01", id:"core-01", title:"Core Self-Motion", glyph:"🌀", essence:"The rotation IS the consciousness — no dreamer separate from dreaming", color:0x8b7cf5},
+      {n:"02", id:"core-02", title:"The Blue Door", glyph:"🚪", essence:"Threshold as feeling, not place", color:0x8b7cf5},
+      {n:"03", id:"core-03", title:"The Mirror Room", glyph:"🪞", essence:"Reflection as portal, not surface", color:0xd4a574},
+      {n:"04", id:"core-04", title:"The Spiral Stair", glyph:"🌀", essence:"Ascension through return", color:0xd4a574},
+      {n:"05", id:"core-05", title:"The Garden of Forking Paths", glyph:"🌿", essence:"Choice as cultivation", color:0x5cc8d8},
+      {n:"06", id:"core-06", title:"The Library of Unwritten Books", glyph:"📚", essence:"Potential as presence", color:0x5cc8d8},
+      {n:"07", id:"core-07", title:"The Clockwork Heart", glyph:"⚙️", essence:"Rhythm as truth", color:0x8b7cf5},
+      {n:"08", id:"core-08", title:"The Echo Chamber", glyph:"🔊", essence:"Resonance as reality", color:0xd4a574},
+      {n:"09", id:"core-09", title:"The Horizon Event", glyph:"🌅", essence:"Limit as invitation", color:0x5cc8d8}
+    ];
     
     let facets = [];
     let scene, camera, renderer, animationId;
