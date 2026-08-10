@@ -238,6 +238,14 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
   <footer><p>The Polyhedron — A dream archive of 121 fragments across 9 geometries. <br>The rotation continues.</p><p class="small"><a href="https://github.com/WooliestHydra23/the-polyhedron" target="_blank" rel="noopener">Source</a> • Built with Three.js & GSAP</p></footer>
 
 <script type="module">
+    console.log('[Polyhedron] Second module STARTED - executing...');
+    // Error handling for module
+    window.addEventListener('error', e => {
+      console.error('[Polyhedron] Second module error:', e.message, e.filename, e.lineno, e.colno, e.error);
+    });
+    window.addEventListener('unhandledrejection', e => {
+      console.error('[Polyhedron] Second module unhandled rejection:', e.reason);
+    });
     // Use UMD globals
     const THREE = window.THREE;
     const gsap = window.gsap;
@@ -471,6 +479,14 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
   <script>
     // Initialize Three.js after UMD globals and modules are loaded
     <script type="module">
+    console.log('[Polyhedron] Second module STARTED - executing...');
+    // Error handling for module
+    window.addEventListener('error', e => {
+      console.error('[Polyhedron] Second module error:', e.message, e.filename, e.lineno, e.colno, e.error);
+    });
+    window.addEventListener('unhandledrejection', e => {
+      console.error('[Polyhedron] Second module unhandled rejection:', e.reason);
+    });
     // Use UMD globals
     const THREE = window.THREE;
     const gsap = window.gsap;
