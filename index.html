@@ -614,6 +614,10 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
     
     window.CORE_CHAPTERS = CORE_CHAPTERS;
     
+        // Run entry ritual on first visit
+    await runEntryRitual();
+    console.log("[Polyhedron] Entry ritual completed");
+    
     console.log("[Polyhedron] First module: exporting globals");
 </script>
 
