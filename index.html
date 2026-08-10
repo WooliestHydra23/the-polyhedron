@@ -548,7 +548,8 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
       
       const reducedMotionToggle = document.getElementById('reducedMotionToggle');
       if (reducedMotionToggle) {
-        reducedMotionToggle.checked = localStorage.getItem('reducedMotion') === 'true';
+        const state = loadDreamState();
+        reducedMotionToggle.checked = state.preferences.reducedMotion;
         reducedMotionToggle.addEventListener('change', () => {
           const enabled = reducedMotionToggle.checked;
           applyReducedMotion(enabled);
