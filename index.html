@@ -463,9 +463,38 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
     initReducedMotion();
     initTheme();
     await runEntryRitual();
-    await initThree();
-    initUI();
+        initUI();
     await loadAndBuild();
+  </script>
+
+  <script>
+    // Initialize Three.js after UMD globals and modules are loaded
+    window.addEventListener('load', async () => {
+      // Wait for UMD globals
+      const waitForGlobals = () => {
+        return new Promise(resolve => {
+          const check = () => {
+            if (window.THREE && window.gsap && window.initThree) {
+              resolve();
+            } else {
+              setTimeout(check, 50);
+            }
+          };
+          check();
+        };
+      };
+      
+      await waitForGlobals();
+      console.log('[Polyhedron] All globals ready, initializing Three.js...');
+      
+      // Call initThree
+      try {
+        await window.initThree();
+        console.log('[Polyhedron] Three.js initialized successfully');
+      } catch (e) {
+        console.error('[Polyhedron] initThree failed:', e);
+      }
+    });
   </script>
 </body>
 </html>
