@@ -479,15 +479,29 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
     // ============ THREE.JS INITIALIZATION ============
     async function initThree() {
       const container = document.getElementById('three-container');
+      console.log('[Polyhedron] initThree started, container:', container);
+      
+      if (!container) {
+        console.error('[Polyhedron] ERROR: three-container not found!');
+        return;
+      }
       
       // Renderer
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: false });
+      try {
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: false });
+        console.log('[Polyhedron] WebGLRenderer created');
+      } catch (e) {
+        console.error('[Polyhedron] ERROR creating WebGLRenderer:', e);
+        return;
+      }
+      
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1;
       container.appendChild(renderer.domElement);
+      console.log('[Polyhedron] Canvas appended to container');
       
       // Scene
       scene = new THREE.Scene();
