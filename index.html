@@ -749,7 +749,7 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
         scene.add(facet);
         
         // Add glyph as sprite
-        const glyphTexture = createGlyphTexture(facetData.data.glyph);
+        const glyphTexture = createGlyphTexture(facetData.glyph);
         const spriteMaterial = new THREE.SpriteMaterial({ 
           map: glyphTexture, 
           color: facetData.color,
