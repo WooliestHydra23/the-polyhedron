@@ -1283,7 +1283,7 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
       const waitForGlobals = () => {
         return new Promise(resolve => {
           const check = () => {
-            if (window.THREE && window.gsap && window.initThree) {
+            if (window.THREE && window.gsap && window.initThree && window.enterGeometry) {
               resolve();
             } else {
               setTimeout(check, 50);
