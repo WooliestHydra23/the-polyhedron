@@ -172,8 +172,8 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
 
   
   <!-- UMD libraries for reliable global access -->
-  <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
-  <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://unpkg.com/three@0.158.0/build/three.min.js" crossorigin="anonymous" onerror="console.error('[Polyhedron] Failed to load Three.js from unpkg, trying fallback...'); const fallback = document.createElement('script'); fallback.src = 'https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js'; fallback.crossOrigin = 'anonymous'; document.head.appendChild(fallback);"></script>
+  <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js" crossorigin="anonymous" onerror="console.error('[Polyhedron] Failed to load GSAP from unpkg, trying fallback...'); const fallback = document.createElement('script'); fallback.src = 'https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js'; fallback.crossOrigin = 'anonymous'; document.head.appendChild(fallback);"></script>
 </head>
 <body>
   <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -437,7 +437,12 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
         themeToggle.addEventListener('click', () => {
           const current = localStorage.getItem('theme') || 'auto';
           const next = current === 'auto' ? 'light' : current === 'light' ? 'dark' : 'auto';
-          localStorage.setItem('theme', next);
+          
+          // Save to dream state
+          const state = loadDreamState();
+          state.preferences.theme = next;
+          saveDreamState(state);
+          
           initTheme();
         });
       }
