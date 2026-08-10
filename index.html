@@ -474,6 +474,46 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
     const THREE = window.THREE;
     const gsap = window.gsap;
     
+    // ============ GLOBAL STATE ============
+    const RADIUS = 3;
+    const FACET_COUNT = 9;
+    const FACET_DATA = window.CORE_CHAPTERS; // From first module
+    
+    let facets = [];
+    let scene, camera, renderer, animationId;
+    let cameraTarget = new THREE.Vector3(0, 0, 0);
+    let currentView = 'HUB';
+    let activeFacet = null;
+    let geometrySpace = null;
+    let fragmentParticles = null;
+    let fragmentsData = [];
+    let reducedMotionEnabled = false;
+    let isDragging = false;
+    let dragStart = { x: 0, y: 0 };
+    let dragRotation = { x: 0, y: 0 };
+    
+    // Dream state (load from localStorage or initialize)
+    let dreamState = {
+      visitCount: 0,
+      lastGeometry: null,
+      currentState: 'HUB',
+      activeFragment: null,
+      preferences: { skipEntryRitual: false, reducedMotion: false, theme: 'auto' },
+      journal: { session: { fragmentsRead: [] } }
+    };
+    
+    function saveDreamState() {
+      localStorage.setItem('polyhedron:dream:v1', JSON.stringify(dreamState));
+    }
+    
+    function loadDreamState() {
+      try {
+        return JSON.parse(localStorage.getItem('polyhedron:dream:v1')) || dreamState;
+      } catch {
+        return dreamState;
+      }
+    }
+    
     // ============ THREE.JS INITIALIZATION ============
     async function initThree() {
       const container = document.getElementById('three-container');
