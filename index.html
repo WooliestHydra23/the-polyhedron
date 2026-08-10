@@ -582,7 +582,7 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
             <span>${chapter.n}</span>
             <span class="nav-badge">${chapter.id}</span>
           </div>
-          <a href="#" class="chapter-link">Enter geometry</a>
+          <a href="#" class="chapter-link" data-chapter="${i}">Enter geometry</a>
         </article>
       `).join('');
       
@@ -598,6 +598,17 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
             card.click();
           }
         });
+
+        // Also handle clicks on chapter links inside cards
+        const link = card.querySelector('.chapter-link');
+        if (link) {
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const chapterIndex = parseInt(link.dataset.chapter);
+            document.getElementById('chapter-overlay').classList.remove('visible');
+            if (typeof window.enterGeometry === 'function') window.enterGeometry(chapterIndex);
+          });
+        }
       });
     }
     
