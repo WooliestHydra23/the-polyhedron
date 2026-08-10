@@ -341,9 +341,10 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
       
       const state = loadDreamState();
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      // Only skip on first visit if user explicitly chose to skip
+      // Only skip if user explicitly chose to skip (skipEntryRitual=true)
+      // On first visit (visitCount === 0 or 1), always run ritual
       // Respect prefers-reduced-motion by speeding up ritual, not skipping entirely
-      if (state.preferences.skipEntryRitual || (state.visitCount > 1 && prefersReducedMotion)) {
+      if (state.preferences.skipEntryRitual && state.visitCount > 1) {
         ritualOverlay.classList.add('skip');
         return;
       }
@@ -436,11 +437,11 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
       const themeToggle = document.getElementById('themeToggle');
       if (themeToggle) {
         themeToggle.addEventListener('click', () => {
-          const current = localStorage.getItem('theme') || 'auto';
+          const state = loadDreamState();
+          const current = state.preferences.theme || 'auto';
           const next = current === 'auto' ? 'light' : current === 'light' ? 'dark' : 'auto';
           
           // Save to dream state
-          const state = loadDreamState();
           state.preferences.theme = next;
           saveDreamState(state);
           
@@ -477,6 +478,9 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
         });
       }
       
+      // Theme
+      initTheme();
+
       // Reduced motion
       initReducedMotion();
 
@@ -637,15 +641,12 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
     window.buildSettings = buildSettings;
     window.initTheme = initTheme;
     window.initReducedMotion = initReducedMotion;
+    window.runEntryRitual = runEntryRitual;
     window.saveDreamState = saveDreamState;
     window.loadDreamState = loadDreamState;
     window.loadFragmentsData = loadFragmentsData;
     
     window.CORE_CHAPTERS = CORE_CHAPTERS;
-    
-        // Run entry ritual on first visit
-    await runEntryRitual();
-    console.log("[Polyhedron] Entry ritual completed");
     
     console.log("[Polyhedron] First module: exporting globals");
 </script>
@@ -1298,7 +1299,17 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
       };
       
       await waitForGlobals();
-      console.log('[Polyhedron] All globals ready, initializing Three.js...');
+      console.log('[Polyhedron] All globals ready, running entry ritual...');
+      
+      // Run entry ritual (needs initTheme/initReducedMotion from second module)
+      try {
+        await window.runEntryRitual();
+        console.log('[Polyhedron] Entry ritual completed');
+      } catch (e) {
+        console.error('[Polyhedron] Entry ritual failed:', e);
+      }
+      
+      console.log('[Polyhedron] Initializing Three.js...');
       
       // Prevent double initialization
       if (threeInitialized) {
