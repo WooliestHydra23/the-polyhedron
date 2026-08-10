@@ -321,7 +321,8 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
     
     // ============ THEME ============
     function initTheme() {
-      const saved = localStorage.getItem('theme') || 'auto';
+      const state = loadDreamState();
+      const saved = state.preferences.theme || 'auto';
       const html = document.documentElement;
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       let theme = saved === 'auto' ? (prefersDark ? 'dark' : 'light') : saved;
@@ -476,6 +477,9 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
         });
       }
       
+      // Reduced motion
+      initReducedMotion();
+
       // Settings
       buildSettings();
     }
