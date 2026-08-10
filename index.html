@@ -1280,6 +1280,14 @@ blockquote { border-left: 3px solid var(--accent-primary); padding-left: 16px; m
       } catch (e) {
         console.error('[Polyhedron] initThree failed:', e);
       }
+      
+      // Load and build UI (chapters, navigation, settings)
+      try {
+        await window.loadAndBuild();
+        console.log('[Polyhedron] loadAndBuild completed, UI initialized');
+      } catch (e) {
+        console.error('[Polyhedron] loadAndBuild failed:', e);
+      }
     });
   </script>
 </body>
